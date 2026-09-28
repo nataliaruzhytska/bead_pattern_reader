@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bead Pattern Ruler</title>
+    <link rel="stylesheet" href="static/styles/style.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+</head>
+<body>
+<div id="appShell">
+    <header id="controls" class="top-panel">
+        <div class="controls-group file-control">
+            <input type="file" id="fileInput" accept="image/*,.pdf">
+        </div>
+
+        <div class="controls-group project-buttons">
+            <button id="saveProject">💾 Зберегти новий</button>
+            <button id="updateProject" disabled>🔄 Оновити</button>
+            <select id="projectList">
+                <option value="">-- Обрати проєкт --</option>
+            </select>
+            <button id="deleteProject" disabled>🗑️ Видалити</button>
+        </div>
+
+        <div class="controls-group ruler-mode-control">
+            <label for="rulerMode">Лінійки:</label>
+            <select id="rulerMode">
+                <option value="vertical">Вертикальна</option>
+                <option value="horizontal">Горизонтальна</option>
+                <option value="both" selected>Обидві</option>
+            </select>
+        </div>
+
+        <div class="controls-group view-options">
+            <div class="view-control">
+                <label for="viewMode">Перегляд:</label>
+                <select id="viewMode">
+                    <option value="fit">Вписати в екран</option>
+                    <option value="original">Оригінальний розмір</option>
+                    <option value="pages">Сторінки</option>
+                </select>
+                <label id="scaleControl" class="scale-control is-hidden">
+                    <span>Масштаб:</span>
+                    <input type="number" id="scaleInput" value="100" min="10" max="200" step="5">
+                    <span>%</span>
+                </label>
+                <button id="applyView" type="button">Застосувати</button>
+            </div>
+        </div>
+
+        <label class="dimming-control" title="Приглушувати частину схеми поза поточним рядом">
+            <input type="checkbox" id="dimmingToggle" checked>
+            <span>Приглушувати фон</span>
+        </label>
+    </header>
+
+    <div id="mainLayout">
+        <aside id="sidePanel">
+            <section class="axis-panel vertical-panel">
+                <h3><span class="axis-dot red-dot"></span>Вертикальна лінійка</h3>
+                <div class="controls-group navigation vertical-navigation">
+                    <button id="prevRow" class="nav-btn prev" title="Попередній стовпчик">◀</button>
+                    <button id="setRowOffset" class="offset-btn" title="Зробити поточний курсор 1-м рядом">🎯</button>
+                    <span id="rowInfo">Рядок ≈ 1</span>
+                    <button id="nextRow" class="nav-btn next" title="Наступний стовпчик">▶</button>
+                </div>
+                <div class="controls-group calibration vertical-calibration">
+                    <div class="calibration-buttons">
+                        <button id="startCalibration">📏 Початок калібровки</button>
+                        <button id="endCalibration" style="display: none;">📐 Кінець калібровки</button>
+                    </div>
+                    <div class="step-control">
+                        <label>Крок ↔ (px):</label>
+                        <input type="number" id="stepInput" value="20" min="1" step="0.1">
+                    </div>
+                </div>
+            </section>
+
+            <section class="axis-panel horizontal-panel">
+                <h3><span class="axis-dot green-dot"></span>Горизонтальна лінійка</h3>
+                <div class="controls-group navigation horizontal-navigation">
+                    <button id="prevHRow" class="nav-btn prev" title="Попередній горизонтальний ряд">▲</button>
+                    <button id="setHRowOffset" class="offset-btn" title="Зробити поточну зелену позицію рядом 1">🎯</button>
+                    <span id="hRowInfo">Рядок ≈ 1</span>
+                    <button id="nextHRow" class="nav-btn next" title="Наступний горизонтальний ряд">▼</button>
+                </div>
+                <div class="controls-group calibration horizontal-calibration">
+                    <div class="calibration-buttons">
+                        <button id="startHCalibration">📏 Початок калібровки</button>
+                        <button id="endHCalibration" style="display:none;">📐 Кінець калібровки</button>
+                    </div>
+                    <div class="step-control">
+                        <label>Крок ↕ (px):</label>
+                        <input type="number" id="hStepInput" value="20" min="1" step="0.1">
+                    </div>
+                </div>
+            </section>
+
+            <section id="pageNavigation" class="page-navigation is-hidden">
+                <h3>Сторінки</h3>
+                <div class="page-buttons">
+                    <button id="prevPage" type="button">◀</button>
+                    <span id="pageInfo">1 / 1</span>
+                    <button id="nextPage" type="button">▶</button>
+                </div>
+                <span class="overlap-info">Перекриття сусідніх сторінок: 10%</span>
+            </section>
+        </aside>
+
+        <main id="workspace">
+            <div id="canvasContainer">
+                <canvas id="patternCanvas"></canvas>
+                <div id="blurOverlay"></div>
+                <div id="highlight"></div>
+                <div id="hHighlight"></div>
+                <div id="ruler"></div>
+                <div id="rulerTouchArea"></div>
+                <div id="hRuler"></div>
+                <div id="hRulerTouchArea"></div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="static/scripts/script.js"></script>
+</body>
+</html>
