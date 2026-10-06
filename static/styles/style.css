@@ -503,3 +503,196 @@ body { min-height:0; }
     .axis-panel, #sidePanel .page-navigation { min-width:250px; margin:0; }
     #workspace { flex:1 1 auto; }
 }
+
+
+/* ===== Quality v4: оригінальна роздільність + чисті лінійки ===== */
+#patternCanvas {
+    display: block;
+    max-width: none;
+    max-height: none;
+    image-rendering: auto;
+}
+
+/* Без приглушення: тільки тонкі яскраві лінії, без смуги поточного кроку. */
+body.dimming-off #highlight,
+body.dimming-off #hHighlight {
+    display: none !important;
+}
+
+body.dimming-off #ruler {
+    background: #ff0000;
+    box-shadow: 0 0 2px rgba(255, 0, 0, .85);
+}
+
+body.dimming-off #hRuler {
+    background: #00b83f;
+    box-shadow: 0 0 2px rgba(0, 184, 63, .85);
+}
+
+
+/* ===== Layout v7: справжня дворядкова панель ===== */
+html, body, #appShell { height: 100%; }
+body { margin: 0; overflow: hidden; }
+
+#appShell {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100vh !important;
+  overflow: hidden !important;
+}
+
+#controls.top-panel {
+  position: relative !important;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 5px 7px !important;
+  min-height: 34px !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+  font-size: 12px !important;
+  box-sizing: border-box;
+}
+
+#controls.top-panel button,
+#controls.top-panel select,
+#controls.top-panel input {
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 2px 6px !important;
+  font-size: 11px !important;
+  box-sizing: border-box;
+}
+
+#mainLayout {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+#secondaryControls {
+  --toolbar-scale: 1;
+  flex: 0 0 auto !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: calc(100% / var(--toolbar-scale)) !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 4px 7px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-bottom: 1px solid #d7d7d7 !important;
+  background: #f7f7f8 !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+  box-sizing: border-box !important;
+  transform: scale(var(--toolbar-scale));
+  transform-origin: top left;
+}
+
+/* Старі картки бічної панелі стають компактними inline-групами */
+#secondaryControls .ruler-panel,
+#secondaryControls .page-navigation,
+#secondaryControls .panel-section,
+#secondaryControls section {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 3px !important;
+  width: auto !important;
+  min-width: 0 !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  margin: 0 !important;
+  padding: 2px 5px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  box-sizing: border-box !important;
+}
+
+#secondaryControls .toolbar-title {
+  display: inline !important;
+  margin: 0 2px 0 0 !important;
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+}
+
+#secondaryControls .vertical-navigation,
+#secondaryControls .horizontal-navigation,
+#secondaryControls .vertical-calibration,
+#secondaryControls .horizontal-calibration {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 3px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+#secondaryControls label,
+#secondaryControls span,
+#secondaryControls .row-info,
+#secondaryControls .info {
+  font-size: 10px !important;
+  line-height: 1 !important;
+  margin: 0 !important;
+}
+
+#secondaryControls button,
+#secondaryControls select,
+#secondaryControls input {
+  height: 23px !important;
+  min-height: 23px !important;
+  padding: 1px 4px !important;
+  margin: 0 !important;
+  font-size: 10px !important;
+  box-sizing: border-box !important;
+}
+
+#secondaryControls input[type="number"] { width: 50px !important; }
+
+#workspace {
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+#canvasContainer {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+}
+
+/* Старий mobile layout більше не перетворює панель назад у side panel */
+@media (max-width: 680px) {
+  #mainLayout { flex-direction: column !important; }
+  #secondaryControls { flex-direction: row !important; }
+  #workspace { width: 100% !important; }
+}
+
+
+/* ===== Fit-to-screen correction ===== */
+#workspace,
+#canvasContainer {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+#canvasContainer {
+  min-width: 0 !important;
+  min-height: 0 !important;
+}

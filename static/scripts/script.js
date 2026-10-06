@@ -223,33 +223,9 @@ fileInput.addEventListener("change", async e => {
   document.getElementById("deleteProject").disabled = true;
   document.getElementById("projectList").value = "";
 
-  if (file.type === "application/pdf") {
-    const reader = new FileReader();
-    reader.onload = function() {
-      const typedarray = new Uint8Array(this.result);
-      pdfjsLib.getDocument(typedarray).promise.then(pdf => {
-        pdf.getPage(1).then(page => {
-          const viewport = page.getViewport({ scale: 2 });
-          const pdfCanvas = document.createElement("canvas");
-          const ctx2 = pdfCanvas.getContext("2d");
-          pdfCanvas.width = viewport.width;
-          pdfCanvas.height = viewport.height;
-
-          page.render({ canvasContext: ctx2, viewport }).promise.then(() => {
-            img.onload = () => {
-              fitToScreen(img);
-              drawImage();
-              rulerPosition = 0; hRulerPosition = 0; hRowOffset = 0;
-              step = 20; hStep = 20; hStepInput.value = hStep;
-              stepInput.value = step;
-              updateRuler();
-};
-            img.src = pdfCanvas.toDataURL();
-          });
-        });
-      });
-    };
-    reader.readAsArrayBuffer(file);
+  if (!file.type.startsWith("image/")) {
+    showToast("Оберіть файл зображення (PNG, JPG, WebP тощо)", "warning");
+    fileInput.value = "";
     return;
   }
 
@@ -269,17 +245,43 @@ fileInput.addEventListener("change", async e => {
 });
 
 function getViewportSize() {
+  const styles = getComputedStyle(canvasContainer);
+  const paddingX = parseFloat(styles.paddingLeft || 0) + parseFloat(styles.paddingRight || 0);
+  const paddingY = parseFloat(styles.paddingTop || 0) + parseFloat(styles.paddingBottom || 0);
+
+  // Canvas має по 20 px службового відступу зліва/зверху і запас справа/знизу.
+  // Рахуємо саме видиму client-area контейнера, без scrollbar.
+  const safetyX = 44;
+  const safetyY = 44;
+
   return {
-    width: Math.max(1, canvasContainer.clientWidth - 40),
-    height: Math.max(1, canvasContainer.clientHeight - 40)
+    width: Math.max(1, canvasContainer.clientWidth - paddingX - safetyX),
+    height: Math.max(1, canvasContainer.clientHeight - paddingY - safetyY)
+  };
+}
+
+function getSourceSize() {
+  return {
+    width: img.naturalWidth || img.width,
+    height: img.naturalHeight || img.height
   };
 }
 
 function setCanvasScale(scale) {
-  canvas.width = Math.max(1, Math.round(img.width * scale));
-  canvas.height = Math.max(1, Math.round(img.height * scale));
-  imgWidth = canvas.width;
-  imgHeight = canvas.height;
+  const source = getSourceSize();
+
+  // Canvas зберігає оригінальну кількість пікселів.
+  // Масштаб змінює лише CSS-розмір, тому повторне збільшення не псує джерело.
+  if (canvas.width !== source.width || canvas.height !== source.height) {
+    canvas.width = source.width;
+    canvas.height = source.height;
+  }
+
+  imgWidth = Math.max(1, source.width * scale);
+  imgHeight = Math.max(1, source.height * scale);
+
+  canvas.style.width = imgWidth + "px";
+  canvas.style.height = imgHeight + "px";
   imgOffsetX = 20;
   imgOffsetY = 20;
   canvas.style.marginLeft = imgOffsetX + "px";
@@ -290,7 +292,8 @@ function setCanvasScale(scale) {
 
 function fitToScreen(img) {
   const viewport = getViewportSize();
-  const scale = Math.min(viewport.width / img.width, viewport.height / img.height, 2);
+  const source = getSourceSize();
+  const scale = Math.min(viewport.width / source.width, viewport.height / source.height, 1);
   setCanvasScale(scale);
   currentViewMode = "fit";
   currentPage = 0;
@@ -320,7 +323,7 @@ function syncOverlayGeometry() {
 
 function calculatePages(scalePercent) {
   const viewport = getViewportSize();
-  const scaledWidth = img.width * scalePercent / 100;
+  const scaledWidth = getSourceSize().width * scalePercent / 100;
   if (scaledWidth <= viewport.width) return 1;
   const stride = viewport.width * (1 - PAGE_OVERLAP);
   return 1 + Math.ceil((scaledWidth - viewport.width) / stride);
@@ -358,7 +361,8 @@ function applyViewMode(mode, scalePercent = 100) {
 
   if (mode === "fit") {
     const viewport = getViewportSize();
-    setCanvasScale(Math.min(viewport.width / img.width, viewport.height / img.height, 2));
+    const source = getSourceSize();
+    setCanvasScale(Math.min(viewport.width / source.width, viewport.height / source.height, 1));
     totalPages = 1;
   } else if (mode === "original") {
     setCanvasScale(1);
@@ -382,8 +386,15 @@ function applyViewMode(mode, scalePercent = 100) {
 }
 
 function drawImage() {
+  const source = getSourceSize();
+  if (canvas.width !== source.width || canvas.height !== source.height) {
+    canvas.width = source.width;
+    canvas.height = source.height;
+  }
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, 0, 0, source.width, source.height);
 }
 
 function updateRuler() {
@@ -568,7 +579,9 @@ stepInput.onchange = () => {
 };
 
 function updateDimming() {
-  blurOverlay.classList.toggle("is-hidden", !dimmingToggle.checked);
+  const enabled = dimmingToggle.checked;
+  blurOverlay.classList.toggle("is-hidden", !enabled);
+  document.body.classList.toggle("dimming-off", !enabled);
 }
 
 dimmingToggle.addEventListener("change", updateDimming);
@@ -899,3 +912,58 @@ document.getElementById("deleteProject").onclick = async () => {
 
 loadProjectList();
 updateRulerVisibility();
+
+
+// ===== Fit both top toolbar rows without horizontal scrolling =====
+function fitToolbarRow(row) {
+  if (!row) return;
+  row.style.setProperty("--toolbar-scale", "1");
+  row.style.transform = "none";
+  row.style.width = "100%";
+
+  requestAnimationFrame(() => {
+    const available = Math.max(1, window.innerWidth);
+    const needed = Math.max(1, row.scrollWidth);
+    const scale = Math.min(1, available / needed);
+
+    if (row.id === "secondaryControls") {
+      row.style.setProperty("--toolbar-scale", scale.toFixed(4));
+      row.style.width = (100 / scale).toFixed(3) + "%";
+      row.style.transform = `scale(${scale})`;
+    } else if (scale < 1) {
+      row.style.transformOrigin = "top left";
+      row.style.transform = `scale(${scale})`;
+      row.style.width = (100 / scale).toFixed(3) + "%";
+      row.style.marginBottom = `${-(row.offsetHeight * (1-scale))}px`;
+    }
+  });
+}
+
+function fitTopToolbars() {
+  fitToolbarRow(document.getElementById("controls"));
+  fitToolbarRow(document.getElementById("secondaryControls"));
+}
+
+window.addEventListener("load", fitTopToolbars);
+window.addEventListener("resize", fitTopToolbars);
+setTimeout(fitTopToolbars, 50);
+
+
+// Після зміни розміру панелей повторно вписуємо схему,
+// якщо активний режим "Вписати в екран".
+let fitResizeTimer;
+function refitImageAfterLayout() {
+  clearTimeout(fitResizeTimer);
+  fitResizeTimer = setTimeout(() => {
+    if (!img || !img.src) return;
+    if (viewMode && viewMode.value === "fit") {
+      fitToScreen(img);
+      drawImage();
+      updateRuler();
+      updateHorizontalRuler();
+    }
+  }, 80);
+}
+
+window.addEventListener("resize", refitImageAfterLayout);
+window.addEventListener("load", () => setTimeout(refitImageAfterLayout, 150));

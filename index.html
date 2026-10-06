@@ -11,7 +11,7 @@
 <div id="appShell">
     <header id="controls" class="top-panel">
         <div class="controls-group file-control">
-            <input type="file" id="fileInput" accept="image/*,.pdf">
+            <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
         </div>
 
         <div class="controls-group project-buttons">
@@ -56,9 +56,10 @@
     </header>
 
     <div id="mainLayout">
-        <aside id="sidePanel">
+        <div id="secondaryControls" class="toolbar-row toolbar-row-secondary">
+
             <section class="axis-panel vertical-panel">
-                <h3><span class="axis-dot red-dot"></span>Вертикальна лінійка</h3>
+                <span class="toolbar-title"><span class="axis-dot red-dot"></span>Вертикальна лінійка</span>
                 <div class="controls-group navigation vertical-navigation">
                     <button id="prevRow" class="nav-btn prev" title="Попередній стовпчик">◀</button>
                     <button id="setRowOffset" class="offset-btn" title="Зробити поточний курсор 1-м рядом">🎯</button>
@@ -78,7 +79,7 @@
             </section>
 
             <section class="axis-panel horizontal-panel">
-                <h3><span class="axis-dot green-dot"></span>Горизонтальна лінійка</h3>
+                <span class="toolbar-title"><span class="axis-dot green-dot"></span>Горизонтальна лінійка</span>
                 <div class="controls-group navigation horizontal-navigation">
                     <button id="prevHRow" class="nav-btn prev" title="Попередній горизонтальний ряд">▲</button>
                     <button id="setHRowOffset" class="offset-btn" title="Зробити поточну зелену позицію рядом 1">🎯</button>
@@ -98,15 +99,15 @@
             </section>
 
             <section id="pageNavigation" class="page-navigation is-hidden">
-                <h3>Сторінки</h3>
+                <span class="toolbar-title">Сторінки</span>
                 <div class="page-buttons">
                     <button id="prevPage" type="button">◀</button>
                     <span id="pageInfo">1 / 1</span>
                     <button id="nextPage" type="button">▶</button>
                 </div>
-                <span class="overlap-info">Перекриття сусідніх сторінок: 10%</span>
             </section>
-        </aside>
+        
+</div>
 
         <main id="workspace">
             <div id="canvasContainer">
@@ -124,7 +125,6 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="static/scripts/script.js"></script>
 </body>
