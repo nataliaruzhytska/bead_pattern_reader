@@ -1,4 +1,5 @@
 const fileInput = document.getElementById("fileInput");
+const mirrorHorizontal = document.getElementById("mirrorHorizontal");
 const canvas = document.getElementById("patternCanvas");
 const ctx = canvas.getContext("2d");
 const ruler = document.getElementById("ruler");
@@ -394,7 +395,13 @@ function drawImage() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = "high";
+  ctx.save();
+  if (mirrorHorizontal && mirrorHorizontal.checked) {
+    ctx.translate(source.width, 0);
+    ctx.scale(-1, 1);
+  }
   ctx.drawImage(img, 0, 0, source.width, source.height);
+  ctx.restore();
 }
 
 function updateRuler() {
@@ -967,3 +974,11 @@ function refitImageAfterLayout() {
 
 window.addEventListener("resize", refitImageAfterLayout);
 window.addEventListener("load", () => setTimeout(refitImageAfterLayout, 150));
+
+// Horizontal mirror: only image pixels are reversed; rulers stay in screen coordinates.
+if (mirrorHorizontal) {
+  mirrorHorizontal.addEventListener("change", () => {
+    drawImage();
+    markUnsaved();
+  });
+}
