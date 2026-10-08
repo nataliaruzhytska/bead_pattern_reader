@@ -87,7 +87,8 @@ function checkForChanges() {
     rulerPosition: rulerPosition,
     step: step,
     rowOffset: rowOffset,
-    hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value
+    hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value,
+    mirrorHorizontal: mirrorHorizontal.checked
   };
 
   hasUnsavedChanges = JSON.stringify(currentState) !== JSON.stringify(lastSavedState);
@@ -206,6 +207,7 @@ fileInput.addEventListener("change", async e => {
         projects[currentProjectIndex].hStep = hStep;
         projects[currentProjectIndex].hRowOffset = hRowOffset;
         projects[currentProjectIndex].rulerMode = rulerMode.value;
+        projects[currentProjectIndex].mirrorHorizontal = mirrorHorizontal.checked;
       if (safeSetItem("beadProjects", JSON.stringify(projects))) {
             showToast("Зміни збережено");
       }
@@ -233,6 +235,7 @@ fileInput.addEventListener("change", async e => {
   const reader = new FileReader();
   reader.onload = ev => {
     img.onload = () => {
+      mirrorHorizontal.checked = false;
       fitToScreen(img);
       drawImage();
       rulerPosition = 0; hRulerPosition = 0; hRowOffset = 0;
@@ -751,7 +754,8 @@ document.getElementById("saveProject").onclick = async () => {
     rulerPosition: rulerPosition,
     step,
     rowOffset,
-    hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value
+    hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value,
+    mirrorHorizontal: mirrorHorizontal.checked
 };
   projects.push(data);
 
@@ -767,7 +771,8 @@ updateRulerVisibility();
       rulerPosition: rulerPosition,
       step: step,
       rowOffset: rowOffset,
-      hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value
+      hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value,
+      mirrorHorizontal: mirrorHorizontal.checked
     };
     hasUnsavedChanges = false;
 
@@ -810,11 +815,14 @@ document.getElementById("projectList").onchange = () => {
       hStepInput.value = hStep;
       hRowOffset = data.hRowOffset || 0;
       rulerMode.value = data.rulerMode || "both";
+      mirrorHorizontal.checked = data.mirrorHorizontal === true;
+      drawImage();
       updateRuler(); updateHorizontalRuler(); updateRulerVisibility();
 
       lastSavedState = {
         rulerPosition: rulerPosition, step: step, rowOffset: rowOffset,
-        hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value
+        hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value,
+        mirrorHorizontal: mirrorHorizontal.checked
       };
       hasUnsavedChanges = false;
 
@@ -851,6 +859,7 @@ document.getElementById("updateProject").onclick = () => {
     projects[currentProjectIndex].hStep = hStep;
     projects[currentProjectIndex].hRowOffset = hRowOffset;
     projects[currentProjectIndex].rulerMode = rulerMode.value;
+    projects[currentProjectIndex].mirrorHorizontal = mirrorHorizontal.checked;
 
     if (safeSetItem("beadProjects", JSON.stringify(projects))) {
 loadProjectList();
@@ -858,7 +867,8 @@ loadProjectList();
 
       lastSavedState = {
         rulerPosition: rulerPosition, step: step, rowOffset: rowOffset,
-        hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value
+        hRulerPosition, hStep, hRowOffset, rulerMode: rulerMode.value,
+        mirrorHorizontal: mirrorHorizontal.checked
       };
       hasUnsavedChanges = false;
 
@@ -921,64 +931,50 @@ loadProjectList();
 updateRulerVisibility();
 
 
-// ===== Fit both top toolbar rows without horizontal scrolling =====
-function fitToolbarRow(row) {
-  if (!row) return;
-  row.style.setProperty("--toolbar-scale", "1");
-  row.style.transform = "none";
-  row.style.width = "100%";
+// Responsive settings: collapsed by default on narrow screens.
+const mobileSettingsToggle = document.getElementById("mobileSettingsToggle");
+const controlsPanel = document.getElementById("controls");
+mobileSettingsToggle.addEventListener("click", () => {
+  const expanded = controlsPanel.classList.toggle("mobile-open");
+  mobileSettingsToggle.setAttribute("aria-expanded", String(expanded));
+  mobileSettingsToggle.querySelector("span").textContent = expanded ? "▴" : "▾";
+  scheduleResponsiveRefit();
+});
 
-  requestAnimationFrame(() => {
-    const available = Math.max(1, window.innerWidth);
-    const needed = Math.max(1, row.scrollWidth);
-    const scale = Math.min(1, available / needed);
-
-    if (row.id === "secondaryControls") {
-      row.style.setProperty("--toolbar-scale", scale.toFixed(4));
-      row.style.width = (100 / scale).toFixed(3) + "%";
-      row.style.transform = `scale(${scale})`;
-    } else if (scale < 1) {
-      row.style.transformOrigin = "top left";
-      row.style.transform = `scale(${scale})`;
-      row.style.width = (100 / scale).toFixed(3) + "%";
-      row.style.marginBottom = `${-(row.offsetHeight * (1-scale))}px`;
+// If the available space changes, refit the canvas and keep the ruler positions
+// and calibration in proportion to the image's new displayed size.
+let responsiveRefitTimer;
+let lastViewportWidth = 0;
+let lastViewportHeight = 0;
+function scheduleResponsiveRefit() {
+  clearTimeout(responsiveRefitTimer);
+  responsiveRefitTimer = setTimeout(() => {
+    if (!img || !img.complete || !img.naturalWidth) return;
+    const viewport = getViewportSize();
+    if (Math.abs(viewport.width - lastViewportWidth) < 2 &&
+        Math.abs(viewport.height - lastViewportHeight) < 2) return;
+    lastViewportWidth = viewport.width;
+    lastViewportHeight = viewport.height;
+    if (currentViewMode === "fit") {
+      applyViewMode("fit", currentScalePercent);
+    } else if (currentViewMode === "pages") {
+      totalPages = calculatePages(currentScalePercent);
+      currentPage = Math.min(currentPage, totalPages - 1);
+      updatePageControls();
+      goToPage(currentPage);
     }
-  });
+  }, 90);
 }
-
-function fitTopToolbars() {
-  fitToolbarRow(document.getElementById("controls"));
-  fitToolbarRow(document.getElementById("secondaryControls"));
+window.addEventListener("resize", scheduleResponsiveRefit);
+window.addEventListener("load", scheduleResponsiveRefit);
+if (typeof ResizeObserver !== "undefined") {
+  new ResizeObserver(scheduleResponsiveRefit).observe(canvasContainer);
 }
-
-window.addEventListener("load", fitTopToolbars);
-window.addEventListener("resize", fitTopToolbars);
-setTimeout(fitTopToolbars, 50);
-
-
-// Після зміни розміру панелей повторно вписуємо схему,
-// якщо активний режим "Вписати в екран".
-let fitResizeTimer;
-function refitImageAfterLayout() {
-  clearTimeout(fitResizeTimer);
-  fitResizeTimer = setTimeout(() => {
-    if (!img || !img.src) return;
-    if (viewMode && viewMode.value === "fit") {
-      fitToScreen(img);
-      drawImage();
-      updateRuler();
-      updateHorizontalRuler();
-    }
-  }, 80);
-}
-
-window.addEventListener("resize", refitImageAfterLayout);
-window.addEventListener("load", () => setTimeout(refitImageAfterLayout, 150));
 
 // Horizontal mirror: only image pixels are reversed; rulers stay in screen coordinates.
 if (mirrorHorizontal) {
   mirrorHorizontal.addEventListener("change", () => {
-    drawImage();
-    markUnsaved();
+    if (img.complete && img.naturalWidth) drawImage();
+    checkForChanges();
   });
 }
