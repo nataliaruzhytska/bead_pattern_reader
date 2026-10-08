@@ -1,712 +1,184 @@
-html {
-    font-size: 16px; /* фіксований розмір шрифту */
-    touch-action: manipulation; /* забороняє pinch-zoom */
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
+/* Bead Pattern Viewer — adaptive layout. No scaling of toolbars. */
+:root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+body { background: #e5e7eb; font-size: 13px; color: #28313b; }
+button, select, input { font: inherit; }
+button, select, input[type="file"], input[type="checkbox"] { cursor: pointer; }
+button, select, input[type="number"] { min-height: 32px; }
+button, select, input[type="number"] {
+  border: 1px solid #d1d8df; border-radius: 7px; background: #fff;
+  color: #293341; padding: 5px 9px;
 }
-
-body {
-    margin: 0;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    font-family: sans-serif;
-    touch-action: manipulation; /* забороняє pinch-zoom */
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    -webkit-tap-highlight-color: transparent;
+button { white-space: nowrap; font-weight: 500; background: #fff; transition: background .15s; }
+button:hover:not(:disabled) { background: #eaf3fe; }
+button:disabled { opacity: .4; cursor: default; }
+button:focus-visible, select:focus-visible, input:focus-visible, #mobileSettingsToggle:focus-visible {
+  outline: 2px solid #1574bf; outline-offset: 2px;
 }
+input[type="checkbox"] { accent-color: #2563eb; width: 16px; height: 16px; flex: none; }
+input[type="number"] { width: 60px; }
+input[type="file"] { max-width: 100%; font-size: 12px; }
+.is-hidden, .axis-hidden { display: none !important; }
+.axis-controls-disabled { opacity: .4; pointer-events: none; }
 
-/* забороняємо подвійний клік для масштабування */
-* {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+#appShell {
+  display: flex; flex-direction: column; height: 100vh; height: 100dvh;
+  width: 100%; overflow: hidden; background: #eef1f4;
 }
-
-#controls {
-    padding: 15px;
-    background: linear-gradient(135deg, rgba(248, 249, 250, 0.9) 0%, rgba(233, 236, 239, 0.9) 100%), url('../img/img.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    flex-wrap: wrap;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 10000;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid #dee2e6;
-    font-size: 14px;
-    min-height: 60px;
-    max-height: 80px;
-    transform: scale(1) !important;
-    transform-origin: top left;
-    justify-content: space-between;
+#mobileSettingsToggle { display: none; }
+#controls.top-panel {
+  flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center;
+  gap: 8px 12px; padding: 8px 12px; width: 100%; max-width: 100%;
+  background: linear-gradient(135deg, rgba(248,249,250,.94), rgba(233,236,239,.92)), url('../img/img.png') center/cover;
+  border-bottom: 1px solid #d8e0e8; z-index: 30;
 }
-
-.controls-group.project-buttons {
-    display: flex;
-    flex-direction: column;
-    align-content: center;
-    align-items: flex-start;
+#controls .controls-group { display: flex; flex: 0 1 auto; min-width: 0; align-items: center; gap: 6px; }
+#controls .file-control { flex: 0 1 260px; min-width: 150px; }
+#controls .file-control input { width: 100%; }
+#controls .project-buttons { flex-wrap: wrap; }
+#controls #projectList { width: clamp(140px, 13vw, 210px); max-width: 100%; }
+#controls .view-options, #controls .view-control, #controls .ruler-mode-control {
+  display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px;
 }
+#controls .view-control { flex-wrap: nowrap; }
+#controls .view-control select { min-width: 145px; }
+#controls .ruler-mode-control select { min-width: 115px; }
+#controls .dimming-control { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; cursor: pointer; }
+#controls .scale-control { display: inline-flex; align-items: center; gap: 4px; }
+#controls .scale-control input { width: 54px; }
 
-.controls-group {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-shrink: 0;
+#mainLayout { flex: 1 1 auto; min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+#secondaryControls {
+  display: flex; flex: 0 0 auto; flex-flow: row wrap; align-items: stretch;
+  align-content: flex-start; gap: 6px 8px; padding: 6px 12px;
+  min-width: 0; max-width: 100%; border-bottom: 1px solid #d6dfe7;
+  background: #f7f9fb; z-index: 20;
 }
-
-.controls-group.calibration {
-    display: flex;
-    flex-direction: column;
+#secondaryControls > * { min-width: 0; }
+#secondaryControls .axis-panel, #secondaryControls .page-navigation, #secondaryControls .mirror-toggle {
+  display: flex; align-items: center; gap: 7px; padding: 5px 7px;
+  min-height: 42px; background: #fff; border: 1px solid #dfe4eb;
+  border-radius: 8px; margin: 0;
 }
-
-.navigation {
-    background: rgba(255, 255, 255, 0.8);
-    padding: 8px 15px;
-    border-radius: 25px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+#secondaryControls .axis-panel {
+  flex: 1 1 480px; flex-flow: row wrap; justify-content: flex-start;
 }
-
-.nav-btn {
-    width: 40px !important;
-    height: 40px !important;
-    border-radius: 50%;
-    border: none;
-    font-size: 14px !important;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-    flex-shrink: 0;
+#secondaryControls .mirror-toggle { flex: 0 0 auto; align-self: start; cursor: pointer; white-space: nowrap; }
+#secondaryControls .page-navigation { flex: 0 0 auto; align-self: start; }
+#secondaryControls .toolbar-title { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; white-space: nowrap; }
+.axis-dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; flex: none; }
+.red-dot { background: #d72738; } .green-dot { background: #12a053; }
+#secondaryControls .controls-group, #secondaryControls .calibration-buttons,
+#secondaryControls .step-control, #secondaryControls .page-buttons {
+  display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px;
 }
-
-.nav-btn.prev {
-    background: linear-gradient(135deg, #ffcdd2, #f8bbd9);
-    color: #c62828;
+#secondaryControls .calibration { flex-flow: row wrap; }
+#secondaryControls .calibration button { font-size: 12px; }
+#secondaryControls .step-control label { white-space: nowrap; font-size: 11px; color: #5c6771; }
+#secondaryControls #stepInput, #secondaryControls #hStepInput { width: 72px; }
+#secondaryControls #rowInfo, #secondaryControls #hRowInfo {
+  min-width: 115px; font-size: 11px; font-weight: 600; color: #3e4852; white-space: nowrap;
 }
+#secondaryControls .navigation { display: flex; align-items: center; gap: 5px; }
+#secondaryControls .nav-btn { width: 33px; height: 33px; min-height: 33px; padding: 0; border-radius: 50%; font-weight: 700; }
+#secondaryControls .nav-btn.prev { color: #b91c1c; background: #fee2e2; border-color: #fecaca; }
+#secondaryControls .nav-btn.next { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+#secondaryControls .offset-btn { min-width: 33px; padding: 4px; }
+#secondaryControls .mirror-toggle input { margin: 0; }
+#pageInfo { min-width: 42px; text-align: center; font-weight: 650; }
 
-.nav-btn.next {
-    background: linear-gradient(135deg, #c8e6c9, #a5d6a7);
-    color: #2e7d32;
-}
-
-.nav-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-.nav-btn:active {
-    transform: translateY(0);
-}
-
-.step-control {
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-    align-items: center;
-}
-
-.step-control label {
-    font-size: 12px;
-    color: #666;
-}
-
-#stepInput {
-    width: 60px !important;
-    padding: 4px !important;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 12px !important;
-}
-
-button:not(.nav-btn) {
-    padding: 6px 10px !important;
-    border: none;
-    border-radius: 4px;
-    background: linear-gradient(135deg, #fff, #f1f3f4);
-    border: 1px solid #dadce0;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-size: 12px !important;
-    flex-shrink: 0;
-}
-
-button:not(.nav-btn):hover {
-    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-    transform: translateY(-1px);
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.offset-btn {
-    border: none !important;
-}
-
-.offset-btn:hover {
-    background: linear-gradient(135deg, #ffeaa7, #fdcb6e) !important;
-}
-
-#rowInfo {
-    font-weight: bold;
-    color: #495057;
-    margin: 0 10px;
-}
-
-select {
-    padding: 4px !important;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: white;
-    font-size: 12px !important;
-}
-
+/* Image area is completely separate from the control panels. */
+#workspace { flex: 1 1 auto; min-height: 0; min-width: 0; width: 100%; position: relative; background: #ddd; overflow: hidden; }
 #canvasContainer {
-    position: relative;
-    background: #ddd;
-    margin-top: 100px; /* великий відступ щоб панель НІКОЛИ не перекривала */
-    padding: 20px;
-    box-sizing: border-box;
-    min-height: calc(100vh - 120px);
-    /* дозволяємо масштабування тільки цього контейнера */
-    isolation: isolate;
-    contain: layout style;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    touch-action: manipulation; /* забороняє pinch-zoom в контейнері */
-    -webkit-user-select: none;
-}
-
-#blurOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: 10;
-    background: rgba(255, 255, 255, 0.6);
-    -webkit-mask: linear-gradient(to right,
-    black 0%,
-    black calc(var(--ruler-left, 0px) - 14px),
-    rgba(0, 0, 0, 0.7) calc(var(--ruler-left, 0px) - 9px),
-    rgba(0, 0, 0, 0.3) calc(var(--ruler-left, 0px) - 4px),
-    transparent calc(var(--ruler-left, 0px) + 1px),
-    transparent calc(var(--ruler-left, 0px) + 3px),
-    rgba(0, 0, 0, 0.3) calc(var(--ruler-left, 0px) + 6px),
-    rgba(0, 0, 0, 0.7) calc(var(--ruler-left, 0px) + 11px),
-    black calc(var(--ruler-left, 0px) + 16px),
-    black 100%
-    );
-    mask: linear-gradient(to right,
-    black 0%,
-    black calc(var(--ruler-left, 0px) - 14px),
-    rgba(0, 0, 0, 0.7) calc(var(--ruler-left, 0px) - 9px),
-    rgba(0, 0, 0, 0.3) calc(var(--ruler-left, 0px) - 4px),
-    transparent calc(var(--ruler-left, 0px) + 1px),
-    transparent calc(var(--ruler-left, 0px) + 3px),
-    rgba(0, 0, 0, 0.3) calc(var(--ruler-left, 0px) + 6px),
-    rgba(0, 0, 0, 0.7) calc(var(--ruler-left, 0px) + 11px),
-    black calc(var(--ruler-left, 0px) + 16px),
-    black 100%
-    );
-}
-
-#patternCanvas {
-    display: block;
-    touch-action: manipulation; /* забороняє pinch-zoom на canvas */
-    pointer-events: auto;
-    /* дозволяємо масштабування картинки */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
-}
-
-#ruler {
-    position: absolute;
-    top: 0;
-    width: 2px;
-    height: 100%;
-    background: red;
-    cursor: ew-resize;
-    z-index: 15;
-}
-
-#ruler::before {
-    content: '';
-    position: absolute;
-    left: -15px; /* розширюємо зону захвату на 15px вліво */
-    right: -15px; /* і на 15px вправо */
-    top: 0;
-    bottom: 0;
-    /* невидима зона для touch */
-}
-
-/* альтернативно, можна додати окремий елемент */
-#rulerTouchArea {
-    position: absolute;
-    top: 0;
-    width: 32px; /* загальна ширина зони захвату */
-    height: 100%;
-    margin-left: -15px; /* центруємо відносно лінійки */
-    cursor: ew-resize;
-    z-index: 14;
-    /* для налагодження можна додати: background: rgba(255,0,0,0.1); */
-}
-
-#highlight {
-    position: absolute;
-    top: 0;
-    height: 100%;
-    background: rgba(128, 128, 128, 0.1);
-    pointer-events: none;
-    z-index: 100; /* нижче панелі */
-}
-
-/* Заокруглення для тостів */
-.toastify {
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-}
-
-.toastify .toast-close {
-    background: none !important;
-    border: none !important;
-    color: white !important;
-    font-size: 16px !important;
-    opacity: 0.7 !important;
-}
-
-.toastify .toast-close:hover {
-    opacity: 1 !important;
-}
-
-.custom-confirm-btn {
-    background: #28a745 !important;
-    color: white !important;
-    border: none !important;
-    padding: 12px 24px !important;
-    font-size: 16px !important;
-    border-radius: 6px !important;
-    margin: 0 5px !important;
-}
-
-.custom-deny-btn {
-    background: #dc3545 !important;
-    color: white !important;
-    border: none !important;
-    padding: 12px 24px !important;
-    font-size: 16px !important;
-    border-radius: 6px !important;
-    margin: 0 5px !important;
-}
-
-.custom-cancel-btn {
-    background: #6c757d !important;
-    color: white !important;
-    border: none !important;
-    padding: 12px 24px !important;
-    font-size: 16px !important;
-    border-radius: 6px !important;
-    margin: 0 5px !important;
-}
-
-
-
-#blurOverlay.is-hidden {
-    display: none;
-}
-
-.dimming-control {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
-}
-
-.dimming-control input {
-    cursor: pointer;
-}
-
-/* Режими перегляду великих схем */
-.view-control, .page-navigation, .scale-control {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    white-space: nowrap;
-}
-.view-control label, .scale-control { font-size: 12px; color: #555; }
-#scaleInput { width: 58px; padding: 4px; font-size: 12px; }
-.is-hidden { display: none !important; }
-.page-navigation { background: rgba(255,255,255,.8); padding: 4px 7px; border-radius: 6px; }
-#pageInfo { min-width: 52px; text-align: center; font-weight: 600; }
-
-#canvasContainer {
-    display: block;
-    overflow: auto;
-    height: calc(100vh - 120px);
-    min-height: 300px;
-    scroll-behavior: smooth;
-    overscroll-behavior: contain;
+  position: relative; width: 100%; height: 100%; padding: 0; margin: 0;
+  background: #ddd; overflow: auto; scroll-behavior: smooth; overscroll-behavior: contain;
+  touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;
 }
 #canvasContainer.page-mode { overflow-x: hidden; overflow-y: auto; }
-#patternCanvas { margin: 0; }
-
-
-/* Дві незалежні лінійки */
-#hRuler { position:absolute; height:2px; background:#16a34a; cursor:ns-resize; z-index:16; }
-#hRulerTouchArea { position:absolute; height:32px; margin-top:-15px; cursor:ns-resize; z-index:15; }
-#hHighlight { position:absolute; background:rgba(22,163,74,.12); pointer-events:none; z-index:99; }
-#highlight { background:rgba(220,38,38,.10); }
-.axis-hidden { display:none !important; }
-.axis-controls-disabled { opacity:.38; pointer-events:none; }
-.axis-label { font-weight:700; font-size:18px; }
-.vertical-axis { color:#dc2626; } .horizontal-axis { color:#16a34a; }
-#hRowInfo { font-weight:bold; color:#166534; margin:0 8px; }
-#hStepInput { width:60px !important; padding:4px !important; border:1px solid #ccc; border-radius:4px; font-size:12px !important; }
-.ruler-mode-control { background:rgba(255,255,255,.82); padding:6px 9px; border-radius:6px; }
-.overlap-info { font-size:10px; color:#666; margin-left:5px; }
-
-/* Приглушення: вертикальна, горизонтальна або обидві осі */
+#patternCanvas { display: block; max-width: none; max-height: none; image-rendering: auto; }
+#blurOverlay {
+  position: absolute; z-index: 10; pointer-events: none; background: rgba(255, 255, 255, .6);
+  -webkit-mask: linear-gradient(to right, black 0%, black calc(var(--ruler-left, 0px) - 14px), rgba(0,0,0,.7) calc(var(--ruler-left, 0px) - 9px), rgba(0,0,0,.3) calc(var(--ruler-left, 0px) - 4px), transparent calc(var(--ruler-left, 0px) + 1px), transparent calc(var(--ruler-left, 0px) + 3px), rgba(0,0,0,.3) calc(var(--ruler-left, 0px) + 6px), rgba(0,0,0,.7) calc(var(--ruler-left, 0px) + 11px), black calc(var(--ruler-left, 0px) + 16px), black 100%);
+  mask: linear-gradient(to right, black 0%, black calc(var(--ruler-left, 0px) - 14px), rgba(0,0,0,.7) calc(var(--ruler-left, 0px) - 9px), rgba(0,0,0,.3) calc(var(--ruler-left, 0px) - 4px), transparent calc(var(--ruler-left, 0px) + 1px), transparent calc(var(--ruler-left, 0px) + 3px), rgba(0,0,0,.3) calc(var(--ruler-left, 0px) + 6px), rgba(0,0,0,.7) calc(var(--ruler-left, 0px) + 11px), black calc(var(--ruler-left, 0px) + 16px), black 100%);
+}
+#blurOverlay.is-hidden { display: none; }
 #blurOverlay[data-ruler-mode="horizontal"] {
   -webkit-mask: linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
   mask: linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
 }
 #blurOverlay[data-ruler-mode="both"] {
-  background: rgba(255,255,255,.6);
-  mask-image:
-    linear-gradient(to right, black 0, black calc(var(--ruler-left) - 8px), transparent var(--ruler-left), transparent calc(var(--ruler-left) + var(--ruler-width)), black calc(var(--ruler-left) + var(--ruler-width) + 8px), black 100%),
-    linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
-  mask-composite: intersect;
   -webkit-mask-image:
     linear-gradient(to right, black 0, black calc(var(--ruler-left) - 8px), transparent var(--ruler-left), transparent calc(var(--ruler-left) + var(--ruler-width)), black calc(var(--ruler-left) + var(--ruler-width) + 8px), black 100%),
     linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
   -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, black 0, black calc(var(--ruler-left) - 8px), transparent var(--ruler-left), transparent calc(var(--ruler-left) + var(--ruler-width)), black calc(var(--ruler-left) + var(--ruler-width) + 8px), black 100%),
+    linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
+  mask-composite: intersect;
+}
+#ruler { position:absolute; top:0; height:100%; width:2px; background:#f00; z-index:15; cursor:ew-resize; }
+#rulerTouchArea { position:absolute; top:0; height:100%; width:32px; margin-left:-15px; z-index:14; cursor:ew-resize; touch-action:none; }
+#highlight { position:absolute; top:0; height:100%; background:rgba(220,38,38,.10); z-index:11; pointer-events:none; }
+#hRuler { position:absolute; height:2px; background:#00b83f; z-index:16; cursor:ns-resize; }
+#hRulerTouchArea { position:absolute; height:32px; margin-top:-15px; z-index:15; cursor:ns-resize; touch-action:none; }
+#hHighlight { position:absolute; background:rgba(22,163,74,.12); z-index:11; pointer-events:none; }
+body.dimming-off #highlight, body.dimming-off #hHighlight { display:none !important; }
+body.dimming-off #ruler { box-shadow:0 0 2px rgba(255,0,0,.85); }
+body.dimming-off #hRuler { box-shadow:0 0 2px rgba(0,184,63,.85); }
+
+.toastify { border-radius: 12px !important; box-shadow: 0 4px 12px rgba(0,0,0,.15) !important; }
+.custom-confirm-btn { background:#28a745 !important; color:#fff !important; padding:12px 24px !important; }
+.custom-deny-btn { background:#dc3545 !important; color:#fff !important; padding:12px 24px !important; }
+.custom-cancel-btn { background:#6c757d !important; color:#fff !important; padding:12px 24px !important; }
+
+@media (max-width: 1200px) {
+  #secondaryControls .axis-panel { flex-basis: 350px; }
+  #controls.top-panel { gap: 7px; }
+  #secondaryControls .calibration-buttons button { padding: 5px; }
+}
+@media (max-width: 740px) {
+  /* Keep settings available without sacrificing half the image on small screens. */
+  #mobileSettingsToggle {
+    display: flex; flex: 0 0 auto; width: 100%; align-items: center; justify-content: space-between;
+    padding: 9px 13px; min-height: 39px; background: #f1f5f9; border: 0;
+    border-bottom: 1px solid #d6dfe7; border-radius: 0; font-weight: 650;
+  }
+  #controls.top-panel { display: none; gap: 8px; padding: 9px; }
+  #controls.top-panel.mobile-open { display: flex; }
+  #controls .file-control { flex: 1 1 100%; }
+  #controls .project-buttons { flex: 1 1 100%; }
+  #controls #projectList { flex: 1 1 140px; }
+  #controls .view-options, #controls .view-control { max-width: 100%; flex-wrap: wrap; }
+  #secondaryControls { padding: 6px; gap: 6px; }
+  #secondaryControls .axis-panel { flex-basis: 100%; gap: 5px 8px; }
+  #secondaryControls .mirror-toggle, #secondaryControls .page-navigation { min-height: 37px; }
+  #secondaryControls .navigation { gap: 4px; }
+  #secondaryControls .nav-btn { width: 35px; height: 35px; min-height: 35px; }
+}
+@media (max-width: 400px) {
+  #secondaryControls .toolbar-title { font-size: 12px; }
+  #secondaryControls #rowInfo, #secondaryControls #hRowInfo { min-width: 0; font-size: 11px; }
+  #secondaryControls .axis-panel { padding: 6px; }
+  #secondaryControls .calibration { width: 100%; }
+  #secondaryControls .calibration-buttons button { font-size: 11px; }
+}
+@media (max-height: 520px) and (max-width: 920px) {
+  /* Landscape phones: use a compact, internally scrollable tool strip. */
+  #secondaryControls { max-height: 112px; overflow-y: auto; overscroll-behavior: contain; }
+  #controls.top-panel.mobile-open { max-height: 42vh; overflow-y: auto; }
 }
 
-@media (max-width: 1100px) {
-  #controls { max-height:none; position:sticky; }
-  #canvasContainer { margin-top:0; height:calc(100vh - 170px); }
+/* Even on very short/narrow viewports, reserve usable room for the canvas. */
+@media (max-width: 740px) and (max-height: 680px) {
+  #controls.top-panel.mobile-open {
+    max-height: 30dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #secondaryControls {
+    max-height: 30dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 }
-
-/* ===== Layout v3: панелі ніколи не перекривають схему ===== */
-html, body { width:100%; height:100%; overflow:hidden; }
-body { min-height:0; }
-#appShell { width:100%; height:100vh; display:flex; flex-direction:column; overflow:hidden; background:#eef1f4; }
-
-#controls.top-panel {
-    position:relative !important;
-    inset:auto !important;
-    flex:0 0 auto;
-    width:100%;
-    min-height:64px;
-    max-height:none;
-    box-sizing:border-box;
-    padding:10px 14px;
-    gap:10px 14px;
-    justify-content:flex-start;
-    overflow-x:auto;
-    overflow-y:hidden;
-    flex-wrap:nowrap;
-    z-index:30;
-}
-#controls .controls-group { flex-shrink:0; }
-#controls .project-buttons { flex-direction:row; align-items:center; gap:6px; }
-#controls .view-options { flex-direction:row; }
-
-#mainLayout { flex:1 1 auto; min-height:0; display:flex; overflow:hidden; }
-#sidePanel {
-    flex:0 0 285px;
-    width:285px;
-    box-sizing:border-box;
-    padding:12px;
-    overflow-y:auto;
-    overflow-x:hidden;
-    background:#f8f9fa;
-    border-right:1px solid #d9dee3;
-    box-shadow:2px 0 8px rgba(0,0,0,.05);
-    z-index:20;
-}
-.axis-panel, #sidePanel .page-navigation {
-    display:flex;
-    flex-direction:column;
-    align-items:stretch;
-    gap:10px;
-    margin:0 0 12px;
-    padding:12px;
-    border-radius:10px;
-    background:#fff;
-    border:1px solid #e1e5e9;
-    box-shadow:0 1px 4px rgba(0,0,0,.05);
-}
-.axis-panel h3, #sidePanel .page-navigation h3 { margin:0; font-size:13px; color:#343a40; display:flex; align-items:center; gap:7px; }
-.axis-dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
-.red-dot { background:#dc2626; }
-.green-dot { background:#16a34a; }
-#sidePanel .navigation { padding:8px; justify-content:space-between; border-radius:8px; box-shadow:none; border:1px solid #edf0f2; }
-#sidePanel .navigation .nav-btn { width:36px !important; height:36px !important; }
-#sidePanel .calibration { align-items:stretch; gap:8px; }
-.calibration-buttons { display:flex; gap:6px; flex-wrap:wrap; }
-#sidePanel .step-control { justify-content:space-between; }
-#sidePanel .page-navigation { white-space:normal; }
-.page-buttons { display:flex; align-items:center; justify-content:space-between; gap:8px; }
-#sidePanel #pageInfo { flex:1; }
-#sidePanel .overlap-info { margin:0; text-align:center; line-height:1.3; }
-
-#workspace { flex:1 1 auto; min-width:0; min-height:0; position:relative; overflow:hidden; background:#ddd; }
-#canvasContainer {
-    position:relative;
-    margin:0 !important;
-    width:100%;
-    height:100% !important;
-    min-height:0;
-    box-sizing:border-box;
-    padding:20px;
-    overflow:auto;
-    background:#ddd;
-    display:block;
-    scroll-behavior:smooth;
-    overscroll-behavior:contain;
-}
-#canvasContainer.page-mode { overflow-x:hidden; overflow-y:auto; }
-
-/* Тільки елементи самої схеми можуть бути поверх canvas. */
-#patternCanvas, #blurOverlay, #highlight, #hHighlight, #ruler, #rulerTouchArea, #hRuler, #hRulerTouchArea { box-sizing:border-box; }
-
-@media (max-width: 900px) {
-    #sidePanel { flex-basis:230px; width:230px; padding:8px; }
-    #controls.top-panel { padding:8px; }
-}
-@media (max-width: 680px) {
-    #mainLayout { flex-direction:column; }
-    #sidePanel {
-        flex:0 0 auto; width:100%; max-height:210px;
-        border-right:0; border-bottom:1px solid #d9dee3;
-        display:flex; gap:8px; overflow-x:auto; overflow-y:hidden;
-    }
-    .axis-panel, #sidePanel .page-navigation { min-width:250px; margin:0; }
-    #workspace { flex:1 1 auto; }
-}
-
-
-/* ===== Quality v4: оригінальна роздільність + чисті лінійки ===== */
-#patternCanvas {
-    display: block;
-    max-width: none;
-    max-height: none;
-    image-rendering: auto;
-}
-
-/* Без приглушення: тільки тонкі яскраві лінії, без смуги поточного кроку. */
-body.dimming-off #highlight,
-body.dimming-off #hHighlight {
-    display: none !important;
-}
-
-body.dimming-off #ruler {
-    background: #ff0000;
-    box-shadow: 0 0 2px rgba(255, 0, 0, .85);
-}
-
-body.dimming-off #hRuler {
-    background: #00b83f;
-    box-shadow: 0 0 2px rgba(0, 184, 63, .85);
-}
-
-
-/* ===== Layout v7: справжня дворядкова панель ===== */
-html, body, #appShell { height: 100%; }
-body { margin: 0; overflow: hidden; }
-
-#appShell {
-  display: flex !important;
-  flex-direction: column !important;
-  height: 100vh !important;
-  overflow: hidden !important;
-}
-
-#controls.top-panel {
-  position: relative !important;
-  flex: 0 0 auto !important;
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 5px !important;
-  padding: 5px 7px !important;
-  min-height: 34px !important;
-  max-height: none !important;
-  overflow: hidden !important;
-  white-space: nowrap !important;
-  font-size: 12px !important;
-  box-sizing: border-box;
-}
-
-#controls.top-panel button,
-#controls.top-panel select,
-#controls.top-panel input {
-  height: 26px !important;
-  min-height: 26px !important;
-  padding: 2px 6px !important;
-  font-size: 11px !important;
-  box-sizing: border-box;
-}
-
-#mainLayout {
-  flex: 1 1 auto !important;
-  min-height: 0 !important;
-  width: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow: hidden !important;
-}
-
-#secondaryControls {
-  --toolbar-scale: 1;
-  flex: 0 0 auto !important;
-  display: flex !important;
-  flex-direction: row !important;
-  flex-wrap: nowrap !important;
-  align-items: center !important;
-  gap: 5px !important;
-  width: calc(100% / var(--toolbar-scale)) !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 4px 7px !important;
-  margin: 0 !important;
-  border: 0 !important;
-  border-bottom: 1px solid #d7d7d7 !important;
-  background: #f7f7f8 !important;
-  overflow: visible !important;
-  white-space: nowrap !important;
-  box-sizing: border-box !important;
-  transform: scale(var(--toolbar-scale));
-  transform-origin: top left;
-}
-
-/* Старі картки бічної панелі стають компактними inline-групами */
-#secondaryControls .ruler-panel,
-#secondaryControls .page-navigation,
-#secondaryControls .panel-section,
-#secondaryControls section {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 3px !important;
-  width: auto !important;
-  min-width: 0 !important;
-  height: 28px !important;
-  min-height: 28px !important;
-  margin: 0 !important;
-  padding: 2px 5px !important;
-  border: 1px solid #ddd !important;
-  border-radius: 4px !important;
-  background: #fff !important;
-  box-shadow: none !important;
-  box-sizing: border-box !important;
-}
-
-#secondaryControls .toolbar-title {
-  display: inline !important;
-  margin: 0 2px 0 0 !important;
-  font-size: 10px !important;
-  font-weight: 600 !important;
-  line-height: 1 !important;
-}
-
-#secondaryControls .vertical-navigation,
-#secondaryControls .horizontal-navigation,
-#secondaryControls .vertical-calibration,
-#secondaryControls .horizontal-calibration {
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  gap: 3px !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-#secondaryControls label,
-#secondaryControls span,
-#secondaryControls .row-info,
-#secondaryControls .info {
-  font-size: 10px !important;
-  line-height: 1 !important;
-  margin: 0 !important;
-}
-
-#secondaryControls button,
-#secondaryControls select,
-#secondaryControls input {
-  height: 23px !important;
-  min-height: 23px !important;
-  padding: 1px 4px !important;
-  margin: 0 !important;
-  font-size: 10px !important;
-  box-sizing: border-box !important;
-}
-
-#secondaryControls input[type="number"] { width: 50px !important; }
-
-#workspace {
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  overflow: hidden !important;
-}
-
-#canvasContainer {
-  width: 100% !important;
-  height: 100% !important;
-  margin: 0 !important;
-}
-
-/* Старий mobile layout більше не перетворює панель назад у side panel */
-@media (max-width: 680px) {
-  #mainLayout { flex-direction: column !important; }
-  #secondaryControls { flex-direction: row !important; }
-  #workspace { width: 100% !important; }
-}
-
-
-/* ===== Fit-to-screen correction ===== */
-#workspace,
-#canvasContainer {
-  max-width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-#canvasContainer {
-  min-width: 0 !important;
-  min-height: 0 !important;
-}
-
-/* Horizontal mirror toggle */
-#secondaryControls .mirror-toggle {
-  display:inline-flex !important; flex-direction:row !important; align-items:center !important;
-  gap:4px !important; height:28px !important; min-height:28px !important;
-  margin:0 !important; padding:2px 6px !important; border:1px solid #ddd !important;
-  border-radius:4px !important; background:#fff !important; box-sizing:border-box !important;
-  cursor:pointer; white-space:nowrap;
-}
-#secondaryControls .mirror-toggle input[type="checkbox"] {
-  width:14px !important; height:14px !important; min-height:14px !important;
-  margin:0 !important; padding:0 !important;
-}
-#secondaryControls .mirror-toggle span { font-size:10px !important; font-weight:600; }
