@@ -1,0 +1,184 @@
+/* Bead Pattern Viewer — adaptive layout. No scaling of toolbars. */
+:root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
+body { background: #e5e7eb; font-size: 13px; color: #28313b; }
+button, select, input { font: inherit; }
+button, select, input[type="file"], input[type="checkbox"] { cursor: pointer; }
+button, select, input[type="number"] { min-height: 32px; }
+button, select, input[type="number"] {
+  border: 1px solid #d1d8df; border-radius: 7px; background: #fff;
+  color: #293341; padding: 5px 9px;
+}
+button { white-space: nowrap; font-weight: 500; background: #fff; transition: background .15s; }
+button:hover:not(:disabled) { background: #eaf3fe; }
+button:disabled { opacity: .4; cursor: default; }
+button:focus-visible, select:focus-visible, input:focus-visible, #mobileSettingsToggle:focus-visible {
+  outline: 2px solid #1574bf; outline-offset: 2px;
+}
+input[type="checkbox"] { accent-color: #2563eb; width: 16px; height: 16px; flex: none; }
+input[type="number"] { width: 60px; }
+input[type="file"] { max-width: 100%; font-size: 12px; }
+.is-hidden, .axis-hidden { display: none !important; }
+.axis-controls-disabled { opacity: .4; pointer-events: none; }
+
+#appShell {
+  display: flex; flex-direction: column; height: 100vh; height: 100dvh;
+  width: 100%; overflow: hidden; background: #eef1f4;
+}
+#mobileSettingsToggle { display: none; }
+#controls.top-panel {
+  flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center;
+  gap: 8px 12px; padding: 8px 12px; width: 100%; max-width: 100%;
+  background: linear-gradient(135deg, rgba(248,249,250,.94), rgba(233,236,239,.92)), url('../img/img.png') center/cover;
+  border-bottom: 1px solid #d8e0e8; z-index: 30;
+}
+#controls .controls-group { display: flex; flex: 0 1 auto; min-width: 0; align-items: center; gap: 6px; }
+#controls .file-control { flex: 0 1 260px; min-width: 150px; }
+#controls .file-control input { width: 100%; }
+#controls .project-buttons { flex-wrap: wrap; }
+#controls #projectList { width: clamp(140px, 13vw, 210px); max-width: 100%; }
+#controls .view-options, #controls .view-control, #controls .ruler-mode-control {
+  display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px;
+}
+#controls .view-control { flex-wrap: nowrap; }
+#controls .view-control select { min-width: 145px; }
+#controls .ruler-mode-control select { min-width: 115px; }
+#controls .dimming-control { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; cursor: pointer; }
+#controls .scale-control { display: inline-flex; align-items: center; gap: 4px; }
+#controls .scale-control input { width: 54px; }
+
+#mainLayout { flex: 1 1 auto; min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
+#secondaryControls {
+  display: flex; flex: 0 0 auto; flex-flow: row wrap; align-items: stretch;
+  align-content: flex-start; gap: 6px 8px; padding: 6px 12px;
+  min-width: 0; max-width: 100%; border-bottom: 1px solid #d6dfe7;
+  background: #f7f9fb; z-index: 20;
+}
+#secondaryControls > * { min-width: 0; }
+#secondaryControls .axis-panel, #secondaryControls .page-navigation, #secondaryControls .mirror-toggle {
+  display: flex; align-items: center; gap: 7px; padding: 5px 7px;
+  min-height: 42px; background: #fff; border: 1px solid #dfe4eb;
+  border-radius: 8px; margin: 0;
+}
+#secondaryControls .axis-panel {
+  flex: 1 1 480px; flex-flow: row wrap; justify-content: flex-start;
+}
+#secondaryControls .mirror-toggle { flex: 0 0 auto; align-self: start; cursor: pointer; white-space: nowrap; }
+#secondaryControls .page-navigation { flex: 0 0 auto; align-self: start; }
+#secondaryControls .toolbar-title { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; white-space: nowrap; }
+.axis-dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; flex: none; }
+.red-dot { background: #d72738; } .green-dot { background: #12a053; }
+#secondaryControls .controls-group, #secondaryControls .calibration-buttons,
+#secondaryControls .step-control, #secondaryControls .page-buttons {
+  display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px;
+}
+#secondaryControls .calibration { flex-flow: row wrap; }
+#secondaryControls .calibration button { font-size: 12px; }
+#secondaryControls .step-control label { white-space: nowrap; font-size: 11px; color: #5c6771; }
+#secondaryControls #stepInput, #secondaryControls #hStepInput { width: 72px; }
+#secondaryControls #rowInfo, #secondaryControls #hRowInfo {
+  min-width: 115px; font-size: 11px; font-weight: 600; color: #3e4852; white-space: nowrap;
+}
+#secondaryControls .navigation { display: flex; align-items: center; gap: 5px; }
+#secondaryControls .nav-btn { width: 33px; height: 33px; min-height: 33px; padding: 0; border-radius: 50%; font-weight: 700; }
+#secondaryControls .nav-btn.prev { color: #b91c1c; background: #fee2e2; border-color: #fecaca; }
+#secondaryControls .nav-btn.next { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
+#secondaryControls .offset-btn { min-width: 33px; padding: 4px; }
+#secondaryControls .mirror-toggle input { margin: 0; }
+#pageInfo { min-width: 42px; text-align: center; font-weight: 650; }
+
+/* Image area is completely separate from the control panels. */
+#workspace { flex: 1 1 auto; min-height: 0; min-width: 0; width: 100%; position: relative; background: #ddd; overflow: hidden; }
+#canvasContainer {
+  position: relative; width: 100%; height: 100%; padding: 0; margin: 0;
+  background: #ddd; overflow: auto; scroll-behavior: smooth; overscroll-behavior: contain;
+  touch-action: pan-x pan-y; -webkit-overflow-scrolling: touch;
+}
+#canvasContainer.page-mode { overflow-x: hidden; overflow-y: auto; }
+#patternCanvas { display: block; max-width: none; max-height: none; image-rendering: auto; }
+#blurOverlay {
+  position: absolute; z-index: 10; pointer-events: none; background: rgba(255, 255, 255, .6);
+  -webkit-mask: linear-gradient(to right, black 0%, black calc(var(--ruler-left, 0px) - 14px), rgba(0,0,0,.7) calc(var(--ruler-left, 0px) - 9px), rgba(0,0,0,.3) calc(var(--ruler-left, 0px) - 4px), transparent calc(var(--ruler-left, 0px) + 1px), transparent calc(var(--ruler-left, 0px) + 3px), rgba(0,0,0,.3) calc(var(--ruler-left, 0px) + 6px), rgba(0,0,0,.7) calc(var(--ruler-left, 0px) + 11px), black calc(var(--ruler-left, 0px) + 16px), black 100%);
+  mask: linear-gradient(to right, black 0%, black calc(var(--ruler-left, 0px) - 14px), rgba(0,0,0,.7) calc(var(--ruler-left, 0px) - 9px), rgba(0,0,0,.3) calc(var(--ruler-left, 0px) - 4px), transparent calc(var(--ruler-left, 0px) + 1px), transparent calc(var(--ruler-left, 0px) + 3px), rgba(0,0,0,.3) calc(var(--ruler-left, 0px) + 6px), rgba(0,0,0,.7) calc(var(--ruler-left, 0px) + 11px), black calc(var(--ruler-left, 0px) + 16px), black 100%);
+}
+#blurOverlay.is-hidden { display: none; }
+#blurOverlay[data-ruler-mode="horizontal"] {
+  -webkit-mask: linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
+  mask: linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
+}
+#blurOverlay[data-ruler-mode="both"] {
+  -webkit-mask-image:
+    linear-gradient(to right, black 0, black calc(var(--ruler-left) - 8px), transparent var(--ruler-left), transparent calc(var(--ruler-left) + var(--ruler-width)), black calc(var(--ruler-left) + var(--ruler-width) + 8px), black 100%),
+    linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, black 0, black calc(var(--ruler-left) - 8px), transparent var(--ruler-left), transparent calc(var(--ruler-left) + var(--ruler-width)), black calc(var(--ruler-left) + var(--ruler-width) + 8px), black 100%),
+    linear-gradient(to bottom, black 0, black calc(var(--h-ruler-top) - 8px), transparent var(--h-ruler-top), transparent calc(var(--h-ruler-top) + var(--h-ruler-height)), black calc(var(--h-ruler-top) + var(--h-ruler-height) + 8px), black 100%);
+  mask-composite: intersect;
+}
+#ruler { position:absolute; top:0; height:100%; width:2px; background:#f00; z-index:15; cursor:ew-resize; }
+#rulerTouchArea { position:absolute; top:0; height:100%; width:32px; margin-left:-15px; z-index:14; cursor:ew-resize; touch-action:none; }
+#highlight { position:absolute; top:0; height:100%; background:rgba(220,38,38,.10); z-index:11; pointer-events:none; }
+#hRuler { position:absolute; height:2px; background:#00b83f; z-index:16; cursor:ns-resize; }
+#hRulerTouchArea { position:absolute; height:32px; margin-top:-15px; z-index:15; cursor:ns-resize; touch-action:none; }
+#hHighlight { position:absolute; background:rgba(22,163,74,.12); z-index:11; pointer-events:none; }
+body.dimming-off #highlight, body.dimming-off #hHighlight { display:none !important; }
+body.dimming-off #ruler { box-shadow:0 0 2px rgba(255,0,0,.85); }
+body.dimming-off #hRuler { box-shadow:0 0 2px rgba(0,184,63,.85); }
+
+.toastify { border-radius: 12px !important; box-shadow: 0 4px 12px rgba(0,0,0,.15) !important; }
+.custom-confirm-btn { background:#28a745 !important; color:#fff !important; padding:12px 24px !important; }
+.custom-deny-btn { background:#dc3545 !important; color:#fff !important; padding:12px 24px !important; }
+.custom-cancel-btn { background:#6c757d !important; color:#fff !important; padding:12px 24px !important; }
+
+@media (max-width: 1200px) {
+  #secondaryControls .axis-panel { flex-basis: 350px; }
+  #controls.top-panel { gap: 7px; }
+  #secondaryControls .calibration-buttons button { padding: 5px; }
+}
+@media (max-width: 740px) {
+  /* Keep settings available without sacrificing half the image on small screens. */
+  #mobileSettingsToggle {
+    display: flex; flex: 0 0 auto; width: 100%; align-items: center; justify-content: space-between;
+    padding: 9px 13px; min-height: 39px; background: #f1f5f9; border: 0;
+    border-bottom: 1px solid #d6dfe7; border-radius: 0; font-weight: 650;
+  }
+  #controls.top-panel { display: none; gap: 8px; padding: 9px; }
+  #controls.top-panel.mobile-open { display: flex; }
+  #controls .file-control { flex: 1 1 100%; }
+  #controls .project-buttons { flex: 1 1 100%; }
+  #controls #projectList { flex: 1 1 140px; }
+  #controls .view-options, #controls .view-control { max-width: 100%; flex-wrap: wrap; }
+  #secondaryControls { padding: 6px; gap: 6px; }
+  #secondaryControls .axis-panel { flex-basis: 100%; gap: 5px 8px; }
+  #secondaryControls .mirror-toggle, #secondaryControls .page-navigation { min-height: 37px; }
+  #secondaryControls .navigation { gap: 4px; }
+  #secondaryControls .nav-btn { width: 35px; height: 35px; min-height: 35px; }
+}
+@media (max-width: 400px) {
+  #secondaryControls .toolbar-title { font-size: 12px; }
+  #secondaryControls #rowInfo, #secondaryControls #hRowInfo { min-width: 0; font-size: 11px; }
+  #secondaryControls .axis-panel { padding: 6px; }
+  #secondaryControls .calibration { width: 100%; }
+  #secondaryControls .calibration-buttons button { font-size: 11px; }
+}
+@media (max-height: 520px) and (max-width: 920px) {
+  /* Landscape phones: use a compact, internally scrollable tool strip. */
+  #secondaryControls { max-height: 112px; overflow-y: auto; overscroll-behavior: contain; }
+  #controls.top-panel.mobile-open { max-height: 42vh; overflow-y: auto; }
+}
+
+/* Even on very short/narrow viewports, reserve usable room for the canvas. */
+@media (max-width: 740px) and (max-height: 680px) {
+  #controls.top-panel.mobile-open {
+    max-height: 30dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  #secondaryControls {
+    max-height: 30dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
