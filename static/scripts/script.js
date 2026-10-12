@@ -236,6 +236,8 @@ fileInput.addEventListener("change", async e => {
   reader.onload = ev => {
     img.onload = () => {
       mirrorHorizontal.checked = false;
+      setToolbarStatus(file.name);
+      closeToolbarMenus();
       fitToScreen(img);
       drawImage();
       rulerPosition = 0; hRulerPosition = 0; hRowOffset = 0;
@@ -629,6 +631,7 @@ applyViewButton.addEventListener("click", async () => {
     }
   }
   applyViewMode(mode, scalePercent);
+  closeToolbarMenus();
 });
 
 document.getElementById("prevPage").addEventListener("click", () => goToPage(currentPage - 1));
@@ -776,6 +779,7 @@ updateRulerVisibility();
     };
     hasUnsavedChanges = false;
 
+    setToolbarStatus(data.name);
     showToast("Проєкт збережено ✅");
   }
 };
@@ -826,6 +830,7 @@ document.getElementById("projectList").onchange = () => {
       };
       hasUnsavedChanges = false;
 
+      setToolbarStatus(data.name);
       showToast(`Проєкт "${data.name}" завантажено`);
     };
 
@@ -919,6 +924,7 @@ document.getElementById("deleteProject").onclick = async () => {
         document.getElementById("updateProject").disabled = true;
         document.getElementById("deleteProject").disabled = true;
 
+        setToolbarStatus(img.naturalWidth ? "Схема без проєкту" : "Схему не вибрано");
         showToast(`Проєкт "${projectName}" видалено`);
       }
     }
@@ -931,14 +937,50 @@ loadProjectList();
 updateRulerVisibility();
 
 
-// Responsive settings: collapsed by default on narrow screens.
-const mobileSettingsToggle = document.getElementById("mobileSettingsToggle");
-const controlsPanel = document.getElementById("controls");
-mobileSettingsToggle.addEventListener("click", () => {
-  const expanded = controlsPanel.classList.toggle("mobile-open");
-  mobileSettingsToggle.setAttribute("aria-expanded", String(expanded));
-  mobileSettingsToggle.querySelector("span").textContent = expanded ? "▴" : "▾";
+// Main toolbar: two independent menus which expand without overlapping the image.
+const fileMenuButton = document.getElementById("fileMenuButton");
+const viewMenuButton = document.getElementById("viewMenuButton");
+const fileMenuPanel = document.getElementById("fileMenuPanel");
+const viewMenuPanel = document.getElementById("viewMenuPanel");
+const toolbarStatus = document.getElementById("toolbarStatus");
+
+function setToolbarStatus(value) {
+  const label = value || "Схему не вибрано";
+  toolbarStatus.textContent = label;
+  toolbarStatus.title = label;
+}
+
+function setToolbarMenu(name) {
+  const fileOpen = name === "file";
+  const viewOpen = name === "view";
+  fileMenuPanel.hidden = !fileOpen;
+  viewMenuPanel.hidden = !viewOpen;
+  fileMenuButton.setAttribute("aria-expanded", String(fileOpen));
+  viewMenuButton.setAttribute("aria-expanded", String(viewOpen));
   scheduleResponsiveRefit();
+}
+
+function closeToolbarMenus() { setToolbarMenu(null); }
+fileMenuButton.addEventListener("click", () => setToolbarMenu(fileMenuPanel.hidden ? "file" : null));
+viewMenuButton.addEventListener("click", () => setToolbarMenu(viewMenuPanel.hidden ? "view" : null));
+
+// Escape dismisses the open menu. Do not close on taps in the image: no floating menu.
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && (!fileMenuPanel.hidden || !viewMenuPanel.hidden)) {
+    const wasFileOpen = !fileMenuPanel.hidden;
+    closeToolbarMenus();
+    (wasFileOpen ? fileMenuButton : viewMenuButton).focus();
+  }
+});
+
+// Reflect file/project selection in the narrow status area, without relying on
+// browser-native text from the file input, which differs across devices.
+document.getElementById("projectList").addEventListener("change", () => {
+  const selected = document.getElementById("projectList");
+  if (selected.value !== "") {
+    setToolbarStatus(selected.selectedOptions[0]?.textContent);
+    closeToolbarMenus();
+  }
 });
 
 // If the available space changes, refit the canvas and keep the ruler positions

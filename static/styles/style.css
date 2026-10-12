@@ -1,92 +1,79 @@
-/* Bead Pattern Viewer — adaptive layout. No scaling of toolbars. */
-:root { color-scheme: light; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+/* Bead Pattern Ruler — full toolbar + separate ruler navigation. */
+:root { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color-scheme: light; }
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; }
-body { background: #e5e7eb; font-size: 13px; color: #28313b; }
-button, select, input { font: inherit; }
-button, select, input[type="file"], input[type="checkbox"] { cursor: pointer; }
-button, select, input[type="number"] { min-height: 32px; }
-button, select, input[type="number"] {
-  border: 1px solid #d1d8df; border-radius: 7px; background: #fff;
-  color: #293341; padding: 5px 9px;
-}
-button { white-space: nowrap; font-weight: 500; background: #fff; transition: background .15s; }
-button:hover:not(:disabled) { background: #eaf3fe; }
-button:disabled { opacity: .4; cursor: default; }
-button:focus-visible, select:focus-visible, input:focus-visible, #mobileSettingsToggle:focus-visible {
-  outline: 2px solid #1574bf; outline-offset: 2px;
-}
-input[type="checkbox"] { accent-color: #2563eb; width: 16px; height: 16px; flex: none; }
-input[type="number"] { width: 60px; }
-input[type="file"] { max-width: 100%; font-size: 12px; }
-.is-hidden, .axis-hidden { display: none !important; }
+body { font-size: 13px; color: #253247; background: #edf1f6; }
+button, input, select { font: inherit; }
+button, select, input[type="checkbox"], input[type="file"] { cursor: pointer; }
+button, select, input[type="number"], .action-button { min-height: 36px; }
+button, select, input[type="number"], .action-button {
+  border: 1px solid #d1dbe6; border-radius: 8px; background: #fff;
+  color: #253247; padding: 6px 10px; }
+button, .action-button { white-space: nowrap; font-weight: 550; }
+button:hover:not(:disabled), .action-button:hover { background: #eaf3ff; }
+button:disabled { opacity: .42; cursor: default; }
+button:focus-visible, select:focus-visible, input:focus-visible, .action-button:focus-within {
+  outline: 2px solid #1574bf; outline-offset: 2px; }
+input[type="checkbox"] { accent-color: #1976d2; width: 16px; height: 16px; flex: none; }
+input[type="number"] { width: 64px; }
+.is-hidden, .axis-hidden, [hidden] { display: none !important; }
 .axis-controls-disabled { opacity: .4; pointer-events: none; }
 
-#appShell {
-  display: flex; flex-direction: column; height: 100vh; height: 100dvh;
-  width: 100%; overflow: hidden; background: #eef1f4;
-}
-#mobileSettingsToggle { display: none; }
-#controls.top-panel {
-  flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center;
-  gap: 8px 12px; padding: 8px 12px; width: 100%; max-width: 100%;
-  background: linear-gradient(135deg, rgba(248,249,250,.94), rgba(233,236,239,.92)), url('../img/img.png') center/cover;
-  border-bottom: 1px solid #d8e0e8; z-index: 30;
-}
-#controls .controls-group { display: flex; flex: 0 1 auto; min-width: 0; align-items: center; gap: 6px; }
-#controls .file-control { flex: 0 1 260px; min-width: 150px; }
-#controls .file-control input { width: 100%; }
-#controls .project-buttons { flex-wrap: wrap; }
-#controls #projectList { width: clamp(140px, 13vw, 210px); max-width: 100%; }
-#controls .view-options, #controls .view-control, #controls .ruler-mode-control {
-  display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px;
-}
-#controls .view-control { flex-wrap: nowrap; }
-#controls .view-control select { min-width: 145px; }
-#controls .ruler-mode-control select { min-width: 115px; }
-#controls .dimming-control { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; cursor: pointer; }
-#controls .scale-control { display: inline-flex; align-items: center; gap: 4px; }
-#controls .scale-control input { width: 54px; }
+#appShell { display:flex; flex-direction:column; width:100%; height:100vh; height:100dvh; overflow:hidden; }
+#appToolbar { flex:0 0 auto; z-index:30; width:100%; min-width:0; background:#fff; border-bottom:1px solid #dbe3ee; box-shadow:0 1px 4px rgba(25,47,78,.06); }
+.toolbar-main { display:flex; align-items:center; gap:clamp(8px,1vw,18px); padding:9px 14px; width:100%; min-width:0; }
+.brand { display:inline-flex; flex:0 1 auto; align-items:center; gap:7px; font-weight:750; font-size:14px; color:#17365b; white-space:nowrap; }
+.brand > span:first-child { display:grid; place-items:center; width:27px; height:27px; border-radius:8px; background:#e7f0ff; color:#215a9e; font-size:17px; }
+.toolbar-menu-buttons { display:flex; flex:0 0 auto; gap:7px; }
+.toolbar-menu-btn { display:inline-flex; align-items:center; gap:6px; min-height:38px; border:1px solid transparent; background:#f0f5fb; color:#19436e; font-weight:650; }
+.toolbar-menu-btn[aria-expanded="true"] { background:#e1efff; border-color:#8bbef4; }
+.toolbar-menu-btn .menu-chevron { margin-left:4px; color:#527291; transition:transform .16s; }
+.toolbar-menu-btn[aria-expanded="true"] .menu-chevron { transform:rotate(180deg); }
+.toolbar-status { margin-left:auto; color:#5d6979; font-size:12px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; min-width:0; }
+.toolbar-drawer { background:#f7f9fd; border-top:1px solid #e5ecf5; padding:11px 16px 13px; overflow-y:auto; overscroll-behavior:contain; max-height:min(42dvh, 280px); }
+.drawer-heading { font-size:12px; font-weight:750; color:#63788f; margin:0 0 9px; text-transform:uppercase; letter-spacing:.025em; }
+.drawer-content { display:flex; flex-flow:row wrap; align-items:center; gap:12px 22px; }
+.drawer-group { display:flex; flex-flow:row wrap; align-items:center; gap:7px; min-width:0; }
+.drawer-group select { max-width:min(260px, 100%); }
+.drawer-group #projectList { min-width:175px; max-width:min(250px, 85vw); }
+.field-label { color:#52647b; font-weight:600; white-space:nowrap; }
+.drawer-separator { height:25px; width:1px; background:#d2dce9; margin:0 3px; }
+.primary-action { display:inline-flex; align-items:center; justify-content:center; background:#e4f0ff; border-color:#b8d8fb; color:#14569e; }
+.danger-action:not(:disabled) { color:#b22935; border-color:#f0c4c8; }
+.visually-hidden-file { position:absolute; width:1px; height:1px; clip-path:inset(50%); overflow:hidden; opacity:0; }
+.scale-control { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+.toggle-label { display:inline-flex; align-items:center; gap:7px; cursor:pointer; white-space:nowrap; }
+.toggle-label input { margin:0; }
+.drawer-group .toggle-label { padding:6px 10px; min-height:36px; border:1px solid #d7e0eb; border-radius:8px; background:#fff; }
 
-#mainLayout { flex: 1 1 auto; min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
-#secondaryControls {
-  display: flex; flex: 0 0 auto; flex-flow: row wrap; align-items: stretch;
-  align-content: flex-start; gap: 6px 8px; padding: 6px 12px;
-  min-width: 0; max-width: 100%; border-bottom: 1px solid #d6dfe7;
-  background: #f7f9fb; z-index: 20;
-}
-#secondaryControls > * { min-width: 0; }
-#secondaryControls .axis-panel, #secondaryControls .page-navigation, #secondaryControls .mirror-toggle {
-  display: flex; align-items: center; gap: 7px; padding: 5px 7px;
-  min-height: 42px; background: #fff; border: 1px solid #dfe4eb;
-  border-radius: 8px; margin: 0;
-}
-#secondaryControls .axis-panel {
-  flex: 1 1 480px; flex-flow: row wrap; justify-content: flex-start;
-}
-#secondaryControls .mirror-toggle { flex: 0 0 auto; align-self: start; cursor: pointer; white-space: nowrap; }
-#secondaryControls .page-navigation { flex: 0 0 auto; align-self: start; }
-#secondaryControls .toolbar-title { display: inline-flex; align-items: center; gap: 6px; font-weight: 650; white-space: nowrap; }
-.axis-dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; flex: none; }
-.red-dot { background: #d72738; } .green-dot { background: #12a053; }
+#mainLayout { flex:1 1 auto; display:flex; flex-direction:column; min-width:0; min-height:0; overflow:hidden; }
+#secondaryControls { display:flex; flex-flow:row wrap; flex:0 0 auto; align-items:stretch; align-content:start; gap:7px 9px;
+  padding:8px 12px; width:100%; min-width:0; border-bottom:1px solid #d9e3ef; background:#f2f6fa; }
+#secondaryControls > * { min-width:0; }
+#secondaryControls .axis-panel, #secondaryControls .page-navigation { display:flex; flex-flow:row wrap; align-items:center; gap:6px 9px;
+  padding:7px 9px; min-width:0; margin:0; background:#fff; border:1px solid #dfe6ef; border-radius:9px; }
+#secondaryControls .axis-panel { flex:1 1 555px; }
+#secondaryControls .page-navigation { flex:0 0 auto; }
+#secondaryControls .toolbar-title { display:inline-flex; align-items:center; gap:5px; font-size:12px; font-weight:750; white-space:nowrap; }
+.axis-dot { width:9px; height:9px; display:inline-block; border-radius:50%; flex:none; }
+.red-dot { background:#db3345; } .green-dot { background:#0d9f64; }
 #secondaryControls .controls-group, #secondaryControls .calibration-buttons,
 #secondaryControls .step-control, #secondaryControls .page-buttons {
-  display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px;
-}
-#secondaryControls .calibration { flex-flow: row wrap; }
-#secondaryControls .calibration button { font-size: 12px; }
-#secondaryControls .step-control label { white-space: nowrap; font-size: 11px; color: #5c6771; }
-#secondaryControls #stepInput, #secondaryControls #hStepInput { width: 72px; }
-#secondaryControls #rowInfo, #secondaryControls #hRowInfo {
-  min-width: 115px; font-size: 11px; font-weight: 600; color: #3e4852; white-space: nowrap;
-}
-#secondaryControls .navigation { display: flex; align-items: center; gap: 5px; }
-#secondaryControls .nav-btn { width: 33px; height: 33px; min-height: 33px; padding: 0; border-radius: 50%; font-weight: 700; }
-#secondaryControls .nav-btn.prev { color: #b91c1c; background: #fee2e2; border-color: #fecaca; }
-#secondaryControls .nav-btn.next { color: #166534; background: #dcfce7; border-color: #bbf7d0; }
-#secondaryControls .offset-btn { min-width: 33px; padding: 4px; }
-#secondaryControls .mirror-toggle input { margin: 0; }
-#pageInfo { min-width: 42px; text-align: center; font-weight: 650; }
+  display:inline-flex; align-items:center; gap:5px; flex:0 1 auto; min-width:0; }
+#secondaryControls .navigation { gap:5px; }
+#secondaryControls .calibration { flex-wrap:wrap; }
+#secondaryControls .calibration-buttons button { font-size:12px; padding:6px 8px; }
+#secondaryControls .step-control label, #secondaryControls .unit { color:#5c6d7f; font-size:11px; white-space:nowrap; }
+#secondaryControls #stepInput, #secondaryControls #hStepInput { width:59px; min-height:34px; padding:5px; }
+#secondaryControls .row-info { font-size:11px; min-width:98px; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:650; color:#3e4c5d; }
+#secondaryControls .nav-btn { width:35px; height:35px; min-height:35px; padding:0; border-radius:50%; font-weight:750; flex:0 0 auto; }
+#secondaryControls .nav-btn.prev { color:#a51530; background:#ffe7ec; border-color:#ffd0da; }
+#secondaryControls .nav-btn.next { color:#087844; background:#ddf8e8; border-color:#b7ebcd; }
+#secondaryControls .offset-btn { min-width:34px; padding:5px; }
+#secondaryControls .page-buttons { gap:7px; }
+#pageInfo { min-width:39px; text-align:center; font-weight:750; }
+#secondaryControls .dimming-control { flex:0 0 auto; align-self:center; padding:9px 10px; min-height:40px;
+  background:#fff; border:1px solid #dfe6ef; border-radius:9px; color:#455569; font-weight:600; }
 
 /* Image area is completely separate from the control panels. */
 #workspace { flex: 1 1 auto; min-height: 0; min-width: 0; width: 100%; position: relative; background: #ddd; overflow: hidden; }
@@ -132,53 +119,46 @@ body.dimming-off #hRuler { box-shadow:0 0 2px rgba(0,184,63,.85); }
 .custom-deny-btn { background:#dc3545 !important; color:#fff !important; padding:12px 24px !important; }
 .custom-cancel-btn { background:#6c757d !important; color:#fff !important; padding:12px 24px !important; }
 
-@media (max-width: 1200px) {
-  #secondaryControls .axis-panel { flex-basis: 350px; }
-  #controls.top-panel { gap: 7px; }
-  #secondaryControls .calibration-buttons button { padding: 5px; }
-}
-@media (max-width: 740px) {
-  /* Keep settings available without sacrificing half the image on small screens. */
-  #mobileSettingsToggle {
-    display: flex; flex: 0 0 auto; width: 100%; align-items: center; justify-content: space-between;
-    padding: 9px 13px; min-height: 39px; background: #f1f5f9; border: 0;
-    border-bottom: 1px solid #d6dfe7; border-radius: 0; font-weight: 650;
-  }
-  #controls.top-panel { display: none; gap: 8px; padding: 9px; }
-  #controls.top-panel.mobile-open { display: flex; }
-  #controls .file-control { flex: 1 1 100%; }
-  #controls .project-buttons { flex: 1 1 100%; }
-  #controls #projectList { flex: 1 1 140px; }
-  #controls .view-options, #controls .view-control { max-width: 100%; flex-wrap: wrap; }
-  #secondaryControls { padding: 6px; gap: 6px; }
-  #secondaryControls .axis-panel { flex-basis: 100%; gap: 5px 8px; }
-  #secondaryControls .mirror-toggle, #secondaryControls .page-navigation { min-height: 37px; }
-  #secondaryControls .navigation { gap: 4px; }
-  #secondaryControls .nav-btn { width: 35px; height: 35px; min-height: 35px; }
-}
-@media (max-width: 400px) {
-  #secondaryControls .toolbar-title { font-size: 12px; }
-  #secondaryControls #rowInfo, #secondaryControls #hRowInfo { min-width: 0; font-size: 11px; }
-  #secondaryControls .axis-panel { padding: 6px; }
-  #secondaryControls .calibration { width: 100%; }
-  #secondaryControls .calibration-buttons button { font-size: 11px; }
-}
-@media (max-height: 520px) and (max-width: 920px) {
-  /* Landscape phones: use a compact, internally scrollable tool strip. */
-  #secondaryControls { max-height: 112px; overflow-y: auto; overscroll-behavior: contain; }
-  #controls.top-panel.mobile-open { max-height: 42vh; overflow-y: auto; }
-}
 
-/* Even on very short/narrow viewports, reserve usable room for the canvas. */
-@media (max-width: 740px) and (max-height: 680px) {
-  #controls.top-panel.mobile-open {
-    max-height: 30dvh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
-  #secondaryControls {
-    max-height: 30dvh;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-  }
+
+@media (max-width: 1150px) {
+  #secondaryControls .axis-panel { flex-basis:480px; }
+  .brand-label { display:none; }
+}
+@media (max-width: 750px) {
+  .toolbar-main { padding:8px 10px; gap:6px; }
+  .toolbar-menu-buttons { gap:5px; }
+  .toolbar-menu-btn { min-height:38px; font-size:12px; padding:7px 8px; }
+  .toolbar-status { font-size:11px; }
+  .toolbar-drawer { padding:9px 10px; max-height:38dvh; }
+  .drawer-group { gap:6px; }
+  #secondaryControls { padding:6px; gap:5px; }
+  #secondaryControls .axis-panel { flex-basis:100%; padding:7px; gap:6px; }
+  #secondaryControls .toolbar-title { font-size:12px; }
+}
+@media (max-width: 475px) {
+  .toolbar-main { flex-wrap:wrap; }
+  .brand { flex:0 0 27px; }
+  .toolbar-menu-buttons { flex:1 0 auto; }
+  .toolbar-menu-btn { flex:1 1 auto; justify-content:center; }
+  .toolbar-status { flex:1 1 100%; margin-left:0; text-align:left; font-size:11px; }
+  .drawer-group { width:100%; }
+  .drawer-separator { display:none; }
+  #secondaryControls .axis-panel .toolbar-title { width:100%; }
+  #secondaryControls .axis-panel .navigation { flex:1 1 auto; }
+  #secondaryControls .axis-panel .calibration { width:100%; justify-content:flex-start; }
+  #secondaryControls .dimming-control { font-size:12px; }
+}
+@media (max-width: 350px) {
+  #secondaryControls .row-info { min-width:68px; }
+  #secondaryControls .nav-btn { width:32px; height:32px; min-height:32px; }
+  .toolbar-menu-btn { font-size:11px; }
+}
+@media (max-height: 680px) {
+  #secondaryControls { max-height:38dvh; overflow-y:auto; overscroll-behavior:contain; }
+  .toolbar-drawer { max-height:35dvh; }
+}
+@media (max-height: 470px) {
+  #secondaryControls { max-height:33dvh; }
+  .toolbar-drawer { max-height:30dvh; }
 }

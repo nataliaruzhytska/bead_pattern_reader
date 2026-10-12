@@ -2,117 +2,132 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f8fafc">
     <title>Bead Pattern Ruler</title>
     <link rel="stylesheet" href="static/styles/style.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
 <div id="appShell">
-    <button id="mobileSettingsToggle" type="button" aria-controls="controls" aria-expanded="false">☰ Файл і налаштування <span aria-hidden="true">▾</span></button>
-    <header id="controls" class="top-panel">
-        <div class="controls-group file-control">
-            <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
+    <header id="appToolbar" aria-label="Головна панель інструментів">
+        <div class="toolbar-main">
+            <div class="brand" title="Bead Pattern Ruler"><span aria-hidden="true">✦</span><span class="brand-label">Bead Pattern Ruler</span></div>
+            <div class="toolbar-menu-buttons">
+                <button id="fileMenuButton" class="toolbar-menu-btn" type="button" aria-controls="fileMenuPanel" aria-expanded="false">📁 Файл <span class="menu-chevron" aria-hidden="true">▾</span></button>
+                <button id="viewMenuButton" class="toolbar-menu-btn" type="button" aria-controls="viewMenuPanel" aria-expanded="false">🔍 Масштаб і вигляд <span class="menu-chevron" aria-hidden="true">▾</span></button>
+            </div>
+            <span id="toolbarStatus" class="toolbar-status" aria-live="polite" title="Назва відкритої схеми">Схему не вибрано</span>
         </div>
-
-        <div class="controls-group project-buttons">
-            <button id="saveProject">💾 Зберегти новий</button>
-            <button id="updateProject" disabled>🔄 Оновити</button>
-            <select id="projectList">
-                <option value="">-- Обрати проєкт --</option>
-            </select>
-            <button id="deleteProject" disabled>🗑️ Видалити</button>
-        </div>
-
-        <div class="controls-group ruler-mode-control">
-            <label for="rulerMode">Лінійки:</label>
-            <select id="rulerMode">
-                <option value="vertical">Вертикальна</option>
-                <option value="horizontal">Горизонтальна</option>
-                <option value="both" selected>Обидві</option>
-            </select>
-        </div>
-
-        <div class="controls-group view-options">
-            <div class="view-control">
-                <label for="viewMode">Перегляд:</label>
-                <select id="viewMode">
-                    <option value="fit">Вписати в екран</option>
-                    <option value="original">Оригінальний розмір</option>
-                    <option value="pages">Сторінки</option>
-                </select>
-                <label id="scaleControl" class="scale-control is-hidden">
-                    <span>Масштаб:</span>
-                    <input type="number" id="scaleInput" value="100" min="10" max="200" step="5">
-                    <span>%</span>
-                </label>
-                <button id="applyView" type="button">Застосувати</button>
+        <!-- Меню розгортаються ПІД тулбаром і пересувають робочу область, не перекривають схему. -->
+        <div id="fileMenuPanel" class="toolbar-drawer" hidden>
+            <div class="drawer-heading">Файли та проєкти</div>
+            <div class="drawer-content">
+                <div class="drawer-group">
+                    <input type="file" id="fileInput" class="visually-hidden-file" accept="image/png,image/jpeg,image/webp,image/gif,image/bmp">
+                    <label for="fileInput" class="action-button primary-action">📂 Відкрити зображення</label>
+                    <span class="drawer-separator" aria-hidden="true"></span>
+                    <button id="saveProject" type="button">💾 Зберегти новий</button>
+                    <button id="updateProject" type="button" disabled>🔄 Оновити</button>
+                </div>
+                <div class="drawer-group">
+                    <label for="projectList" class="field-label">Проєкт</label>
+                    <select id="projectList"><option value="">— Обрати проєкт —</option></select>
+                    <button id="deleteProject" type="button" class="danger-action" disabled>🗑️ Видалити</button>
+                </div>
             </div>
         </div>
-
-        <label class="dimming-control" title="Приглушувати частину схеми поза поточним рядом">
-            <input type="checkbox" id="dimmingToggle" checked>
-            <span>Приглушувати фон</span>
-        </label>
+        <div id="viewMenuPanel" class="toolbar-drawer" hidden>
+            <div class="drawer-heading">Налаштування відображення</div>
+            <div class="drawer-content">
+                <div class="drawer-group">
+                    <label for="viewMode" class="field-label">Масштаб</label>
+                    <select id="viewMode">
+                        <option value="fit">Вписати в екран</option>
+                        <option value="original">Оригінальний розмір</option>
+                        <option value="pages">Сторінки</option>
+                    </select>
+                    <label id="scaleControl" class="scale-control is-hidden">
+                        <span>Розмір</span>
+                        <input type="number" id="scaleInput" value="100" min="10" max="200" step="5" inputmode="decimal">
+                        <span>%</span>
+                    </label>
+                    <button id="applyView" type="button" class="primary-action">Застосувати</button>
+                </div>
+                <div class="drawer-group">
+                    <label for="rulerMode" class="field-label">Лінійки</label>
+                    <select id="rulerMode">
+                        <option value="vertical">Вертикальна</option>
+                        <option value="horizontal">Горизонтальна</option>
+                        <option value="both" selected>Обидві</option>
+                    </select>
+                    <label class="toggle-label mirror-toggle" title="Дзеркальне відображення схеми зліва направо">
+                        <input type="checkbox" id="mirrorHorizontal">
+                        <span>↔ Дзеркально</span>
+                    </label>
+                </div>
+            </div>
+        </div>
     </header>
 
     <div id="mainLayout">
-        <div id="secondaryControls" class="toolbar-row toolbar-row-secondary">
-      <label class="mirror-toggle" title="Відобразити схему дзеркально по горизонталі">
-        <input type="checkbox" id="mirrorHorizontal">
-        <span>↔ Дзеркально</span>
-      </label>
-
-            <section class="axis-panel vertical-panel">
-                <span class="toolbar-title"><span class="axis-dot red-dot"></span>Вертикальна лінійка</span>
+        <nav id="secondaryControls" aria-label="Навігація за схемою">
+            <section class="axis-panel vertical-panel" aria-label="Керування вертикальною лінійкою">
+                <span class="toolbar-title"><span class="axis-dot red-dot"></span>Вертикальна</span>
                 <div class="controls-group navigation vertical-navigation">
-                    <button id="prevRow" class="nav-btn prev" title="Попередній стовпчик">◀</button>
-                    <button id="setRowOffset" class="offset-btn" title="Зробити поточний курсор 1-м рядом">🎯</button>
-                    <span id="rowInfo">Рядок ≈ 1</span>
-                    <button id="nextRow" class="nav-btn next" title="Наступний стовпчик">▶</button>
+                    <button id="prevRow" class="nav-btn prev" type="button" title="Попередній стовпчик" aria-label="Попередній стовпчик">◀</button>
+                    <button id="setRowOffset" class="offset-btn" type="button" title="Поточна позиція — рядок 1" aria-label="Зробити поточну позицію рядком 1">🎯</button>
+                    <span id="rowInfo" class="row-info">Рядок ≈ 1</span>
+                    <button id="nextRow" class="nav-btn next" type="button" title="Наступний стовпчик" aria-label="Наступний стовпчик">▶</button>
                 </div>
                 <div class="controls-group calibration vertical-calibration">
                     <div class="calibration-buttons">
-                        <button id="startCalibration">📏 Початок калібровки</button>
-                        <button id="endCalibration" style="display: none;">📐 Кінець калібровки</button>
+                        <button id="startCalibration" type="button" title="Калібрувати крок вертикальної лінійки">📏 Калібрувати</button>
+                        <button id="endCalibration" type="button" style="display:none">📐 Завершити</button>
                     </div>
                     <div class="step-control">
-                        <label>Крок ↔ (px):</label>
-                        <input type="number" id="stepInput" value="20" min="1" step="0.1">
+                        <label for="stepInput">Крок ↔</label>
+                        <input type="number" id="stepInput" value="20" min="1" step="0.1" inputmode="decimal">
+                        <span class="unit">px</span>
                     </div>
                 </div>
             </section>
 
-            <section class="axis-panel horizontal-panel">
-                <span class="toolbar-title"><span class="axis-dot green-dot"></span>Горизонтальна лінійка</span>
+            <section class="axis-panel horizontal-panel" aria-label="Керування горизонтальною лінійкою">
+                <span class="toolbar-title"><span class="axis-dot green-dot"></span>Горизонтальна</span>
                 <div class="controls-group navigation horizontal-navigation">
-                    <button id="prevHRow" class="nav-btn prev" title="Попередній горизонтальний ряд">▲</button>
-                    <button id="setHRowOffset" class="offset-btn" title="Зробити поточну зелену позицію рядом 1">🎯</button>
-                    <span id="hRowInfo">Рядок ≈ 1</span>
-                    <button id="nextHRow" class="nav-btn next" title="Наступний горизонтальний ряд">▼</button>
+                    <button id="prevHRow" class="nav-btn prev" type="button" title="Попередній горизонтальний ряд" aria-label="Попередній горизонтальний ряд">▲</button>
+                    <button id="setHRowOffset" class="offset-btn" type="button" title="Поточна позиція — рядок 1" aria-label="Зробити поточну позицію рядком 1">🎯</button>
+                    <span id="hRowInfo" class="row-info">Рядок ≈ 1</span>
+                    <button id="nextHRow" class="nav-btn next" type="button" title="Наступний горизонтальний ряд" aria-label="Наступний горизонтальний ряд">▼</button>
                 </div>
                 <div class="controls-group calibration horizontal-calibration">
                     <div class="calibration-buttons">
-                        <button id="startHCalibration">📏 Початок калібровки</button>
-                        <button id="endHCalibration" style="display:none;">📐 Кінець калібровки</button>
+                        <button id="startHCalibration" type="button" title="Калібрувати крок горизонтальної лінійки">📏 Калібрувати</button>
+                        <button id="endHCalibration" type="button" style="display:none">📐 Завершити</button>
                     </div>
                     <div class="step-control">
-                        <label>Крок ↕ (px):</label>
-                        <input type="number" id="hStepInput" value="20" min="1" step="0.1">
+                        <label for="hStepInput">Крок ↕</label>
+                        <input type="number" id="hStepInput" value="20" min="1" step="0.1" inputmode="decimal">
+                        <span class="unit">px</span>
                     </div>
                 </div>
             </section>
 
-            <section id="pageNavigation" class="page-navigation is-hidden">
+            <section id="pageNavigation" class="page-navigation is-hidden" aria-label="Перемикання сторінок">
                 <span class="toolbar-title">Сторінки</span>
                 <div class="page-buttons">
-                    <button id="prevPage" type="button">◀</button>
+                    <button id="prevPage" type="button" aria-label="Попередня сторінка">◀</button>
                     <span id="pageInfo">1 / 1</span>
-                    <button id="nextPage" type="button">▶</button>
+                    <button id="nextPage" type="button" aria-label="Наступна сторінка">▶</button>
                 </div>
             </section>
-        
-</div>
+
+            <label class="toggle-label dimming-control" title="Приглушувати частину схеми поза поточним рядом">
+                <input type="checkbox" id="dimmingToggle" checked>
+                <span>Приглушувати фон</span>
+            </label>
+        </nav>
 
         <main id="workspace">
             <div id="canvasContainer">
@@ -128,7 +143,6 @@
         </main>
     </div>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="static/scripts/script.js"></script>
